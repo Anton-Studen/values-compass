@@ -3,43 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Компас Ценностей - Интерактивное упражнение</title>
+    <meta name="description" content="Приложение для работы с ценностями по методу ACT">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Ценности">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+    
+    <title>Определение ценностей - ACT приложение</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-
+        
         header {
             text-align: center;
             color: white;
             margin-bottom: 30px;
         }
-
+        
         header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
+        
         header p {
             font-size: 1.1em;
             opacity: 0.9;
         }
-
+        
         .instructions {
             background: white;
             padding: 20px;
@@ -47,12 +63,12 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
+        
         .instructions h2 {
             color: #667eea;
             margin-bottom: 10px;
         }
-
+        
         .sorting-container {
             background: white;
             padding: 20px;
@@ -60,17 +76,17 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
+        
         .columns-wrapper {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
-
+        
         .column {
             min-height: 500px;
         }
-
+        
         .column-header {
             text-align: center;
             padding: 15px;
@@ -80,23 +96,23 @@
             font-size: 1.2em;
             color: white;
         }
-
+        
         .header-high {
             background-color: #22c55e;
         }
-
+        
         .header-medium {
             background-color: #f59e0b;
         }
-
+        
         .header-low {
             background-color: #ef4444;
         }
-
+        
         .header-highest {
             background-color: #10b981;
         }
-
+        
         .drop-zone {
             min-height: 450px;
             padding: 15px;
@@ -104,13 +120,13 @@
             border-radius: 10px;
             transition: all 0.3s;
         }
-
+        
         .drop-zone.drag-over {
             background-color: #f3f4f6;
             border-color: #667eea;
             border-style: solid;
         }
-
+        
         .card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -122,33 +138,33 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             user-select: none;
         }
-
+        
         .card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-
+        
         .card.dragging {
             opacity: 0.5;
         }
-
+        
         .card-title {
             font-size: 1.05em;
             font-weight: bold;
             margin-bottom: 8px;
         }
-
+        
         .card-questions {
             font-size: 0.85em;
             opacity: 0.95;
             line-height: 1.4;
         }
-
+        
         .action-buttons {
             text-align: center;
             margin-top: 30px;
         }
-
+        
         .btn {
             padding: 15px 30px;
             font-size: 1.1em;
@@ -159,25 +175,25 @@
             transition: all 0.3s;
             font-weight: bold;
         }
-
+        
         .btn-primary {
             background-color: #667eea;
             color: white;
         }
-
+        
         .btn-primary:hover {
             background-color: #5568d3;
         }
-
+        
         .btn-secondary {
             background-color: #6b7280;
             color: white;
         }
-
+        
         .btn-secondary:hover {
             background-color: #4b5563;
         }
-
+        
         .comparison-container {
             background: white;
             padding: 40px;
@@ -185,25 +201,25 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             display: none;
         }
-
+        
         .comparison-header {
             text-align: center;
             margin-bottom: 30px;
         }
-
+        
         .comparison-header h2 {
             color: #667eea;
             font-size: 2em;
             margin-bottom: 10px;
         }
-
+        
         .comparison-progress {
             text-align: center;
             color: #6b7280;
             font-size: 1.1em;
             margin-bottom: 30px;
         }
-
+        
         .comparison-question {
             text-align: center;
             font-size: 1.3em;
@@ -211,7 +227,7 @@
             margin-bottom: 30px;
             font-weight: 500;
         }
-
+        
         .comparison-cards {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -219,7 +235,7 @@
             max-width: 900px;
             margin: 0 auto;
         }
-
+        
         .comparison-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -229,24 +245,24 @@
             transition: all 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-
+        
         .comparison-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
-
+        
         .comparison-card-title {
             font-size: 1.5em;
             font-weight: bold;
             margin-bottom: 15px;
         }
-
+        
         .comparison-card-questions {
             font-size: 1em;
             opacity: 0.95;
             line-height: 1.5;
         }
-
+        
         .summary {
             background: white;
             padding: 30px;
@@ -254,45 +270,45 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             display: none;
         }
-
+        
         .summary h2 {
             color: #667eea;
             margin-bottom: 20px;
             font-size: 2em;
         }
-
+        
         .summary-section {
             margin-bottom: 25px;
         }
-
+        
         .summary-section h3 {
             color: #333;
             margin-bottom: 10px;
             font-size: 1.3em;
         }
-
+        
         .summary-section ul {
             list-style: none;
             padding-left: 0;
         }
-
+        
         .summary-section li {
             padding: 10px;
             margin-bottom: 5px;
             background-color: #f3f4f6;
             border-radius: 5px;
         }
-
+        
         .ranked-list {
             counter-reset: item;
         }
-
+        
         .ranked-list li {
             counter-increment: item;
             position: relative;
             padding-left: 40px;
         }
-
+        
         .ranked-list li::before {
             content: counter(item);
             position: absolute;
@@ -310,7 +326,7 @@
             font-weight: bold;
             font-size: 0.9em;
         }
-
+        
         .values-container {
             background: white;
             padding: 20px;
@@ -319,17 +335,17 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             display: none;
         }
-
+        
         .values-columns {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
-
+        
         .values-column {
             min-height: 500px;
         }
-
+        
         .values-column-header {
             text-align: center;
             padding: 15px;
@@ -339,7 +355,7 @@
             font-size: 1.1em;
             color: white;
         }
-
+        
         .values-drop-zone {
             min-height: 450px;
             padding: 15px;
@@ -347,13 +363,13 @@
             border-radius: 10px;
             transition: all 0.3s;
         }
-
+        
         .values-drop-zone.drag-over {
             background-color: #f3f4f6;
             border-color: #667eea;
             border-style: solid;
         }
-
+        
         .value-card {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
             color: white;
@@ -365,86 +381,236 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             user-select: none;
         }
-
+        
         .value-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-
+        
+        /* Стиль для редактируемой карточки "Другая ценность" */
+        .value-card.editable-card {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);
+            border: 2px solid #fbbf24;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .value-card.editable-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 12px rgba(245, 158, 11, 0.4);
+        }
+        
+        .value-card.editable-card .edit-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
+        }
+        
         .value-card-title {
             font-size: 1em;
             font-weight: bold;
             margin-bottom: 6px;
         }
-
+        
         .value-card-desc {
             font-size: 0.85em;
             opacity: 0.95;
             line-height: 1.4;
         }
-
-        .final-values-summary {
+        
+        /* Модальное окно для редактирования ценности */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
             background: white;
             padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .modal-input-group {
+            margin-bottom: 20px;
+        }
+        
+        .modal-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+        }
+        
+        .modal-input,
+        .modal-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .modal-input:focus,
+        .modal-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .modal-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .modal-hint {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .final-values-summary {
+            background: #ffffff;
+            padding: 30px 30px 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.06);
+            margin-top: 20px;
             display: none;
         }
-
+        
         .final-values-summary h2 {
-            color: #667eea;
             margin-bottom: 20px;
-            font-size: 2em;
+            font-size: 1.8em;
+            color: #4f46e5;
+            text-align: left;
         }
-
+        
+        .final-values-summary-header {
+            font-size: 0.95em;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+        
+        .final-values-summary-header strong {
+            font-weight: 600;
+        }
+        
         .final-values-summary-section {
             margin-bottom: 25px;
         }
-
+        
         .final-values-summary-section h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.3em;
+            margin-bottom: 12px;
+            font-size: 1.15em;
+            color: #111827;
         }
-
+        
         .final-values-summary-section ul {
             list-style: none;
             padding-left: 0;
+            margin: 0;
         }
-
+        
         .final-values-summary-section li {
-            padding: 8px;
-            margin-bottom: 4px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
             background-color: #f3f4f6;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 0.95em;
+            display: flex;
+            align-items: center;
         }
-
+        
+        .final-values-summary .ranked-list {
+            counter-reset: item;
+        }
+        
+        .final-values-summary .ranked-list li {
+            position: relative;
+            padding-left: 42px;
+        }
+        
+        .final-values-summary .ranked-list li::before {
+            content: counter(item);
+            counter-increment: item;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background-color: #4f46e5;
+            color: #ffffff;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .final-values-group-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #047857;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .final-values-group-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background-color: #22c55e;
+        }
+        
+        /* Committed Action */
         .committed-action-section {
-            margin-top: 30px;
-            padding: 25px;
+            margin-top: 25px;
+            padding: 20px 18px;
             background-color: #fef3c7;
             border-left: 5px solid #f59e0b;
-            border-radius: 8px;
+            border-radius: 10px;
         }
-
+        
         .committed-action-section h3 {
             color: #92400e;
-            margin-bottom: 15px;
-            font-size: 1.4em;
+            margin-bottom: 14px;
+            font-size: 1.15em;
         }
-
+        
         .committed-action-section p {
             color: #78350f;
-            margin-bottom: 12px;
-            line-height: 1.6;
-            font-size: 1.05em;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            font-size: 0.95em;
         }
-
-        .committed-action-section strong {
-            color: #92400e;
-        }
-
+        
         .refined-sorting-container {
             background: white;
             padding: 20px;
@@ -453,36 +619,36 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             display: none;
         }
-
+        
         @media (max-width: 1024px) {
             .columns-wrapper,
             .values-columns,
             .comparison-cards {
                 grid-template-columns: 1fr;
             }
-
+            
             .column,
             .values-column {
                 min-height: auto;
             }
-
+            
             .drop-zone,
             .values-drop-zone {
                 min-height: 200px;
             }
         }
-
+        
         @media (max-width: 768px) {
             header h1 {
                 font-size: 1.8em;
             }
-
+            
             .btn {
                 display: block;
                 width: 100%;
                 margin: 10px 0;
             }
-
+            
             .comparison-container {
                 padding: 20px;
             }
@@ -492,15 +658,17 @@
 <body>
     <div class="container">
         <header>
-            <h1>🧭 Компас Ценностей</h1>
-            <p>Интерактивное упражнение по прояснению и уточнению ваших ценностей</p>
+            <h1>🎯 Определение личных ценностей</h1>
+            <p>Приложение для работы с ценностями по методу ACT</p>
         </header>
-
+        
+        <!-- Инструкции для шага 1 -->
         <div class="instructions" id="instructions-sorting">
-            <h2>Шаг 1. Сортировка областей ценностей</h2>
-            <p>Перетащите карточки с областями ценностей в соответствующие колонки. Распределите их по важности для вас.</p>
+            <h2>Шаг 1. Сортировка жизненных областей</h2>
+            <p>Перетащите карточки в соответствующие колонки. Оцените важность каждой области для вашей жизни.</p>
         </div>
-
+        
+        <!-- Шаг 1: Сортировка областей -->
         <div id="sorting-area">
             <div class="sorting-container">
                 <div class="columns-wrapper">
@@ -508,142 +676,177 @@
                         <div class="column-header header-high">Очень важно</div>
                         <div class="drop-zone" id="high-importance" data-category="high"></div>
                     </div>
-
                     <div class="column">
-                        <div class="column-header header-medium">Важно</div>
+                        <div class="column-header header-medium">Средне</div>
                         <div class="drop-zone" id="medium-importance" data-category="medium"></div>
                     </div>
-
                     <div class="column">
                         <div class="column-header header-low">Не важно</div>
                         <div class="drop-zone" id="low-importance" data-category="low"></div>
                     </div>
                 </div>
             </div>
-
+            
             <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="resetCards()">Сбросить</button>
-                <button class="btn btn-primary" onclick="proceedToComparison()">Далее</button>
+                <button class="btn btn-secondary" onclick="resetCards()">🔄 Сбросить</button>
+                <button class="btn btn-primary" onclick="proceedToComparison()">➡️ Продолжить</button>
             </div>
         </div>
-
+        
+        <!-- Инструкции для шага 2 -->
         <div class="instructions" id="instructions-comparison" style="display: none;">
-            <h2>Шаг 2. Ранжирование наиболее важных областей</h2>
-            <p>Теперь из пары областей выберите ту, которая важнее для вас <strong>сейчас</strong>. Нажмите на карточку с более важной областью ценностей.</p>
+            <h2>Шаг 2. Сравнение важных областей</h2>
+            <p>Выберите, <strong>какая область важнее</strong>. Отвечайте быстро, следуя первой интуиции.</p>
         </div>
-
+        
+        <!-- Шаг 2: Сравнение -->
         <div class="comparison-container" id="comparison-area">
             <div class="comparison-header">
-                <h2>Что важнее для вас сейчас?</h2>
+                <h2>🤔 Что важнее?</h2>
             </div>
             <div class="comparison-progress" id="comparison-progress"></div>
-            <div class="comparison-question">Из этих двух областей ценностей что важнее сейчас?</div>
+            <div class="comparison-question">Выберите более важную область</div>
             <div class="comparison-cards" id="comparison-cards"></div>
         </div>
-
+        
+        <!-- Сводка по группам -->
         <div class="summary" id="summary-groups">
-            <h2>Ваши результаты по областям ценностей</h2>
+            <h2>📊 Результаты сортировки</h2>
             <div id="summary-groups-content"></div>
             <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="backToSortingFromSummary()">Назад</button>
-                <button class="btn btn-primary" onclick="goToValuesSort()">Далее</button>
+                <button class="btn btn-secondary" onclick="backToSortingFromSummary()">⬅️ Назад</button>
+                <button class="btn btn-primary" onclick="goToValuesSort()">➡️ Продолжить</button>
             </div>
         </div>
-
+        
+        <!-- Инструкции для шага 4 -->
         <div class="instructions" id="instructions-values" style="display: none;">
             <h2>Шаг 4. Уточнение ценностей в выбранной области</h2>
             <p id="selected-group-title"></p>
-            <p>Перетащите карточки конкретных ценностей в соответствующие колонки. Все ценности начинаются в колонке «Важно». Перемещайте их в «Очень важно», «Не важно» или оставляйте в «Важно».</p>
+            <p>Распределите ценности по категориям. Можете добавить собственную ценность, нажав на карточку "Другая ценность".</p>
         </div>
-
+        
+        <!-- Шаг 4: Сортировка ценностей -->
         <div class="values-container" id="values-sorting-area">
             <div class="values-columns">
                 <div class="values-column">
                     <div class="values-column-header" style="background-color: #22c55e;">Очень важно</div>
                     <div class="values-drop-zone" id="values-high" data-category="high"></div>
                 </div>
-
                 <div class="values-column">
-                    <div class="values-column-header" style="background-color: #f59e0b;">Важно</div>
+                    <div class="values-column-header" style="background-color: #f59e0b;">Средне</div>
                     <div class="values-drop-zone" id="values-medium" data-category="medium"></div>
                 </div>
-
                 <div class="values-column">
                     <div class="values-column-header" style="background-color: #ef4444;">Не важно</div>
                     <div class="values-drop-zone" id="values-low" data-category="low"></div>
                 </div>
             </div>
-
+            
             <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="resetValuesCards()">Сбросить</button>
-                <button class="btn btn-primary" onclick="proceedFromValuesSort()">Далее</button>
+                <button class="btn btn-secondary" onclick="resetValuesCards()">🔄 Сбросить</button>
+                <button class="btn btn-primary" onclick="proceedFromValuesSort()">➡️ Продолжить</button>
             </div>
         </div>
-
+        
+        <!-- Инструкции для шага 5 -->
         <div class="instructions" id="instructions-refined" style="display: none;">
-            <h2 id="refined-title-heading">Шаг 5. Уточнение самых важных ценностей</h2>
+            <h2 id="refined-title-heading">Шаг 5. Уточнение</h2>
             <p id="refined-intro-text"></p>
-            <p>Перетащите карточки в соответствующие колонки для окончательной приоритизации.</p>
+            <p>Распределите их по трём категориям.</p>
         </div>
-
+        
+        <!-- Шаг 5: Уточненная сортировка -->
         <div class="refined-sorting-container" id="refined-sorting-area">
             <div class="values-columns">
                 <div class="values-column">
-                    <div class="values-column-header header-highest">Важнее других</div>
+                    <div class="values-column-header header-highest">Самое важное</div>
                     <div class="values-drop-zone" id="refined-highest" data-category="highest"></div>
                 </div>
-
                 <div class="values-column">
-                    <div class="values-column-header header-high">Важно</div>
+                    <div class="values-column-header header-high">Очень важно</div>
                     <div class="values-drop-zone" id="refined-medium" data-category="medium"></div>
                 </div>
-
                 <div class="values-column">
-                    <div class="values-column-header header-medium">Менее важно</div>
+                    <div class="values-column-header header-medium">Средне</div>
                     <div class="values-drop-zone" id="refined-low" data-category="low"></div>
                 </div>
             </div>
-
+            
             <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="resetRefinedCards()">Сбросить</button>
-                <button class="btn btn-primary" onclick="proceedFromRefinedSort()">Далее</button>
+                <button class="btn btn-secondary" onclick="resetRefinedCards()">🔄 Сбросить</button>
+                <button class="btn btn-primary" onclick="proceedFromRefinedSort()">➡️ Продолжить</button>
             </div>
         </div>
-
+        
+        <!-- Инструкции для шага 6 -->
         <div class="instructions" id="instructions-values-comparison" style="display: none;">
-            <h2>Шаг 6. Ранжирование самых важных ценностей</h2>
-            <p>Из пары ценностей выберите ту, которая важнее для вас <strong>сейчас</strong> в контексте выбранной области. Нажмите на более важную ценность.</p>
+            <h2>Шаг 6. Сравнение ценностей</h2>
+            <p>Выберите, <strong>какая ценность важнее</strong>. Слушайте свою интуицию.</p>
         </div>
-
+        
+        <!-- Шаг 6: Сравнение ценностей -->
         <div class="comparison-container" id="values-comparison-area">
             <div class="comparison-header">
-                <h2>Какая ценность важнее для вас сейчас?</h2>
+                <h2>🤔 Что важнее?</h2>
             </div>
             <div class="comparison-progress" id="values-comparison-progress"></div>
-            <div class="comparison-question">Из этих двух ценностей что важнее сейчас?</div>
+            <div class="comparison-question">Выберите более важную ценность</div>
             <div class="comparison-cards" id="values-comparison-cards"></div>
         </div>
-
+        
+        <!-- Финальная сводка -->
         <div class="final-values-summary" id="final-values-summary">
-            <h2>Ваши результаты по выбранной области</h2>
+            <h2>🎯 Ваши ключевые ценности</h2>
             <div id="final-values-summary-content"></div>
-
+            
             <div class="committed-action-section">
-                <h3>📋 Переход к действиям (Committed Action)</h3>
-                <p><strong>1.</strong> Если в области «<strong id="domain-name"></strong>» вы живёте по ценности <strong id="top-value-name"></strong>, что вы делаете иначе на этой неделе (10–30 минут)?</p>
-                <p><strong>2.</strong> Где/когда это будет (день, место, триггер), и как вы поймёте, что сделали?</p>
-                <p><strong>3.</strong> Что помешает (мысли/эмоции/усталость/избегание), и что вы готовы взять с собой, чтобы всё равно сделать шаг?</p>
+                <h3>📝 Committed Action</h3>
+                <p><strong>1.</strong> Подумайте о сфере <strong id="domain-name"></strong> и ценности <strong id="top-value-name"></strong>, которая оказалась для вас наиболее важной. За 10–30 минут опишите, что значит для вас жить в соответствии с этой ценностью?</p>
+                <p><strong>2.</strong> Что вы можете сделать уже на этой неделе, чтобы приблизиться к этой ценности, сделать хотя бы небольшой шаг?</p>
+                <p><strong>3.</strong> Какие барьеры, мысли, эмоции могут помешать вам?</p>
             </div>
-
+            
             <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="backFromFinalSummary()">Назад</button>
-                <button class="btn btn-primary" onclick="saveFinalValuesResults()">Сохранить результаты</button>
+                <button class="btn btn-secondary" onclick="backFromFinalSummary()">⬅️ Назад</button>
+                <button class="btn btn-primary" onclick="saveFinalValuesResults()">💾 Сохранить результаты</button>
+            </div>
+        </div>
+        
+        <!-- Модальное окно для редактирования ценности -->
+        <div class="modal-overlay" id="editValueModal">
+            <div class="modal-content">
+                <div class="modal-header">Внесите собственную ценность - <span id="modal-domain-name"></span></div>
+                <div class="modal-input-group">
+                    <label class="modal-label" for="customValueTitle">Название ценности</label>
+                    <input type="text" id="customValueTitle" class="modal-input" placeholder="Введите название" maxlength="50">
+                </div>
+                <div class="modal-input-group">
+                    <label class="modal-label" for="customValueDesc">Описание ценности</label>
+                    <textarea id="customValueDesc" class="modal-textarea" placeholder="Введите описание"></textarea>
+                </div>
+                <div class="modal-hint">
+                    💡 Нажмите Enter для сохранения карточки
+                </div>
             </div>
         </div>
     </div>
-
+    
     <script>
-        const groupsData = [
+        // Service Worker для PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker зарегистрирован:', registration.scope);
+                    })
+                    .catch(function(err) {
+                        console.error('Service Worker ошибка регистрации:', err);
+                    });
+            });
+        }
+        
+const groupsData = [
             { id: 1, title: "Семейные отношения", questions: "Каких отношений со своей семьей вы хотите? Каким братом/сестрой/сыном/дочерью/дядей/внуком вы хотите быть?" },
             { id: 2, title: "Физическое благополучие", questions: "Говоря о вашем здоровье, что наиболее важно для вас в этой области? Как вы хотите выглядеть и чувствовать себя?" },
             { id: 3, title: "Брак / пара / интимные отношения", questions: "Каким мужем/женой/партнером вы хотите быть? Частью каких отношений вы хотите быть?" },
@@ -654,9 +857,8 @@
             { id: 8, title: "Дружба / социальные отношения", questions: "Каким другом вы хотите быть? Какие отношения вам важно развивать? Как вы хотите обращаться с друзьями?" },
             { id: 9, title: "Занятость", questions: "Какая работа ценна для вас? Какие качества вы хотите привнести как работник? Какого качества рабочие отношения вы хотите построить?" },
             { id: 10, title: "Образование / личностное развитие", questions: "Какие зоны развития вам важны? Какие навыки вы хотите развить? О чем вы хотите больше знать?" }
-        ];
-
-        const values40 = [
+        ];    
+       const values40 = [
             { id: 1, title: "Принятие", desc: "Открытость и готовность принимать себя, других, жизнь и свои чувства такими, какие они есть." },
             { id: 2, title: "Авантюрность", desc: "Готовность создавать и искать новые, рискованные или захватывающие переживания." },
             { id: 3, title: "Напористость", desc: "Спокойно, честно и уважительно отстаивать свои права и просить о том, что вам нужно." },
@@ -693,12 +895,9 @@
             { id: 34, title: "Поддержка других", desc: "Быть доступным, ободряющим и помогающим - себе и другим." },
             { id: 35, title: "Надёжность", desc: "Быть верным, честным, ответственным и заслуживающим доверия." },
             { id: 36, title: "Доверие", desc: "Быть готовым верить в честность, искренность и компетентность другого." },
-            { id: 37, title: "Другая ценность 1", desc: "Своя собственная ценность (запишите отдельно, если хотите)." },
-            { id: 38, title: "Другая ценность 2", desc: "Своя собственная ценность (запишите отдельно, если хотите)." },
-            { id: 39, title: "Другая ценность 3", desc: "Своя собственная ценность (запишите отдельно, если хотите)." },
-            { id: 40, title: "Другая ценность 4", desc: "Своя собственная ценность (запишите отдельно, если хотите)." }
+            { id: 37, title: "Другая ценность", desc: "Нажмите для добавления собственной ценности" }
         ];
-
+        
         let draggedElement = null;
         let highImportanceGroups = [];
         let comparisons = [];
@@ -707,117 +906,131 @@
         let rankedHighGroups = [];
         let topGroup = null;
         let needsRefinedSort = false;
-
         let topValuesForComparison = [];
         let valuesComparisons = [];
         let currentValuesComparisonIndex = 0;
         let valuesComparisonResults = {};
         let rankedTopValues = [];
-
+        
         function initializeGroupCards() {
-            const highZone = document.getElementById("high-importance");
-            const mediumZone = document.getElementById("medium-importance");
-            const lowZone = document.getElementById("low-importance");
-
+            const highZone = document.getElementById('high-importance');
+            const mediumZone = document.getElementById('medium-importance');
+            const lowZone = document.getElementById('low-importance');
+            
             if (!highZone || !mediumZone || !lowZone) return;
-
-            highZone.innerHTML = "";
-            mediumZone.innerHTML = "";
-            lowZone.innerHTML = "";
-
+            
+            highZone.innerHTML = '';
+            mediumZone.innerHTML = '';
+            lowZone.innerHTML = '';
+            
             groupsData.forEach((value, index) => {
                 const card = createGroupCard(value);
-                if (index % 3 === 0) highZone.appendChild(card);
-                else if (index % 3 === 1) mediumZone.appendChild(card);
-                else lowZone.appendChild(card);
+                if (index % 3 === 0) {
+                    highZone.appendChild(card);
+                } else if (index % 3 === 1) {
+                    mediumZone.appendChild(card);
+                } else {
+                    lowZone.appendChild(card);
+                }
             });
         }
-
+        
         function createGroupCard(value) {
-            const card = document.createElement("div");
-            card.className = "card";
+            const card = document.createElement('div');
+            card.className = 'card';
             card.draggable = true;
             card.dataset.id = value.id;
-            card.innerHTML = "<div class=\"card-title\">" + value.title + "</div><div class=\"card-questions\">" + value.questions + "</div>";
-            card.addEventListener("dragstart", handleDragStart);
-            card.addEventListener("dragend", handleDragEnd);
+            card.innerHTML = `<div class="card-title">${value.title}</div><div class="card-questions">${value.questions}</div>`;
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
             return card;
         }
-
+        
         function handleDragStart(e) {
             draggedElement = this;
-            this.classList.add("dragging");
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/plain", "");
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', '');
         }
-
+        
         function handleDragEnd(e) {
-            this.classList.remove("dragging");
-            document.querySelectorAll(".drop-zone, .values-drop-zone").forEach(zone => {
-                zone.classList.remove("drag-over");
+            this.classList.remove('dragging');
+            document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
             });
         }
-
+        
         function setupDropZones() {
-            const zones = document.querySelectorAll(".drop-zone, .values-drop-zone");
+            const zones = document.querySelectorAll('.drop-zone, .values-drop-zone');
             zones.forEach(zone => {
-                zone.addEventListener("dragover", function(e) {
+                zone.addEventListener('dragover', function(e) {
                     e.preventDefault();
-                    this.classList.add("drag-over");
+                    this.classList.add('drag-over');
                 });
-                zone.addEventListener("drop", function(e) {
+                
+                zone.addEventListener('drop', function(e) {
                     e.preventDefault();
-                    this.classList.remove("drag-over");
-                    if (draggedElement) this.appendChild(draggedElement);
+                    this.classList.remove('drag-over');
+                    if (draggedElement) {
+                        this.appendChild(draggedElement);
+                    }
                 });
-                zone.addEventListener("dragleave", function(e) {
+                
+                zone.addEventListener('dragleave', function(e) {
                     const rect = this.getBoundingClientRect();
-                    if (e.clientX < rect.left || e.clientX >= rect.right || e.clientY < rect.top || e.clientY >= rect.bottom) {
-                        this.classList.remove("drag-over");
+                    if (e.clientX < rect.left || e.clientX >= rect.right ||
+                        e.clientY < rect.top || e.clientY >= rect.bottom) {
+                        this.classList.remove('drag-over');
                     }
                 });
             });
         }
-
+        
         function resetCards() {
-            if (confirm("Сбросить распределение?")) initializeGroupCards();
+            if (confirm('Вы уверены, что хотите сбросить все карточки?')) {
+                initializeGroupCards();
+            }
         }
-
+        
         function proceedToComparison() {
-            const highCards = Array.from(document.getElementById("high-importance").querySelectorAll(".card"));
+            const highCards = Array.from(document.getElementById('high-importance').querySelectorAll('.card'));
+            
             if (highCards.length === 0) {
-                alert("Переместите хотя бы одну карточку в \"Очень важно\".");
+                alert('Пожалуйста, переместите хотя бы одну карточку в категорию "Очень важно".');
                 return;
             }
-
+            
             highImportanceGroups = highCards.map(card => groupsData.find(v => v.id === parseInt(card.dataset.id)));
-
+            
             if (highImportanceGroups.length === 1) {
                 rankedHighGroups = [...highImportanceGroups];
                 topGroup = rankedHighGroups[0];
                 showGroupsSummary();
                 return;
             }
-
+            
             comparisons = [];
             for (let i = 0; i < highImportanceGroups.length; i++) {
                 for (let j = i + 1; j < highImportanceGroups.length; j++) {
                     comparisons.push([highImportanceGroups[i], highImportanceGroups[j]]);
                 }
             }
-
+            
             comparisonResults = {};
-            highImportanceGroups.forEach(value => comparisonResults[value.id] = 0);
+            highImportanceGroups.forEach(value => {
+                comparisonResults[value.id] = 0;
+            });
+            
             currentComparisonIndex = 0;
-
-            document.getElementById("instructions-sorting").style.display = "none";
-            document.getElementById("sorting-area").style.display = "none";
-            document.getElementById("instructions-comparison").style.display = "block";
-            document.getElementById("comparison-area").style.display = "block";
-
+            
+            document.getElementById('instructions-sorting').style.display = 'none';
+            document.getElementById('sorting-area').style.display = 'none';
+            document.getElementById('instructions-comparison').style.display = 'block';
+            document.getElementById('comparison-area').style.display = 'block';
+            
             showComparison();
         }
-
+        
         function showComparison() {
             if (currentComparisonIndex >= comparisons.length) {
                 rankedHighGroups = highImportanceGroups.sort((a, b) => comparisonResults[b.id] - comparisonResults[a.id]);
@@ -825,106 +1038,217 @@
                 showGroupsSummary();
                 return;
             }
-
-            const valueA = comparisons[currentComparisonIndex][0];
-            const valueB = comparisons[currentComparisonIndex][1];
-            document.getElementById("comparison-progress").textContent = "Вопрос " + (currentComparisonIndex + 1) + " из " + comparisons.length;
-
-            const cardsContainer = document.getElementById("comparison-cards");
-            cardsContainer.innerHTML = 
-                "<div class=\"comparison-card\" onclick=\"selectGroupValue(" + valueA.id + ")\"><div class=\"comparison-card-title\">" + valueA.title + "</div><div class=\"comparison-card-questions\">" + valueA.questions + "</div></div>" +
-                "<div class=\"comparison-card\" onclick=\"selectGroupValue(" + valueB.id + ")\"><div class=\"comparison-card-title\">" + valueB.title + "</div><div class=\"comparison-card-questions\">" + valueB.questions + "</div></div>";
+            
+            const [valueA, valueB] = comparisons[currentComparisonIndex];
+            
+            document.getElementById('comparison-progress').textContent = `Вопрос ${currentComparisonIndex + 1} из ${comparisons.length}`;
+            
+            const cardsContainer = document.getElementById('comparison-cards');
+            cardsContainer.innerHTML = `
+                <div class="comparison-card" onclick="selectGroupValue(${valueA.id})">
+                    <div class="comparison-card-title">${valueA.title}</div>
+                    <div class="comparison-card-questions">${valueA.questions}</div>
+                </div>
+                <div class="comparison-card" onclick="selectGroupValue(${valueB.id})">
+                    <div class="comparison-card-title">${valueB.title}</div>
+                    <div class="comparison-card-questions">${valueB.questions}</div>
+                </div>
+            `;
         }
-
+        
         function selectGroupValue(selectedId) {
             comparisonResults[selectedId]++;
             currentComparisonIndex++;
             showComparison();
         }
-
+        
         function showGroupsSummary() {
-            const mediumCards = Array.from(document.getElementById("medium-importance").querySelectorAll(".card"));
-            const lowCards = Array.from(document.getElementById("low-importance").querySelectorAll(".card"));
-
-            let html = "";
+            const mediumCards = Array.from(document.getElementById('medium-importance').querySelectorAll('.card'));
+            const lowCards = Array.from(document.getElementById('low-importance').querySelectorAll('.card'));
+            
+            let html = '';
+            
             if (rankedHighGroups.length > 0) {
-                html += "<div class=\"summary-section\"><h3>🟢 Очень важно (по приоритету)</h3><ul class=\"ranked-list\">";
-                rankedHighGroups.forEach(value => html += "<li>" + value.title + "</li>");
-                html += "</ul></div>";
+                html += `<div class="summary-section"><h3>Очень важно</h3><ul class="ranked-list">`;
+                rankedHighGroups.forEach(value => {
+                    html += `<li>${value.title}</li>`;
+                });
+                html += `</ul></div>`;
             }
+            
             if (mediumCards.length > 0) {
-                html += "<div class=\"summary-section\"><h3>🟡 Важно</h3><ul>";
-                mediumCards.forEach(card => html += "<li>" + card.querySelector(".card-title").textContent + "</li>");
-                html += "</ul></div>";
+                html += `<div class="summary-section"><h3>Средне</h3><ul>`;
+                mediumCards.forEach(card => {
+                    html += `<li>${card.querySelector('.card-title').textContent}</li>`;
+                });
+                html += `</ul></div>`;
             }
+            
             if (lowCards.length > 0) {
-                html += "<div class=\"summary-section\"><h3>🔴 Не важно</h3><ul>";
-                lowCards.forEach(card => html += "<li>" + card.querySelector(".card-title").textContent + "</li>");
-                html += "</ul></div>";
+                html += `<div class="summary-section"><h3>Не важно</h3><ul>`;
+                lowCards.forEach(card => {
+                    html += `<li>${card.querySelector('.card-title').textContent}</li>`;
+                });
+                html += `</ul></div>`;
             }
-
-            document.getElementById("summary-groups-content").innerHTML = html;
-            document.getElementById("instructions-comparison").style.display = "none";
-            document.getElementById("comparison-area").style.display = "none";
-            document.getElementById("summary-groups").style.display = "block";
+            
+            document.getElementById('summary-groups-content').innerHTML = html;
+            
+            document.getElementById('instructions-comparison').style.display = 'none';
+            document.getElementById('comparison-area').style.display = 'none';
+            document.getElementById('summary-groups').style.display = 'block';
         }
-
+        
         function backToSortingFromSummary() {
-            document.getElementById("summary-groups").style.display = "none";
-            document.getElementById("instructions-sorting").style.display = "block";
-            document.getElementById("sorting-area").style.display = "block";
+            document.getElementById('summary-groups').style.display = 'none';
+            document.getElementById('instructions-sorting').style.display = 'block';
+            document.getElementById('sorting-area').style.display = 'block';
         }
-
+        
         function goToValuesSort() {
-            if (!topGroup && document.getElementById("high-importance").querySelectorAll(".card").length > 0) {
-                const id = parseInt(document.getElementById("high-importance").querySelectorAll(".card")[0].dataset.id);
+            if (!topGroup && document.getElementById('high-importance').querySelectorAll('.card').length > 0) {
+                const id = parseInt(document.getElementById('high-importance').querySelectorAll('.card')[0].dataset.id);
                 topGroup = groupsData.find(v => v.id === id);
             }
+            
             if (!topGroup) {
-                alert("Ошибка: не выбрана приоритетная группа.");
+                alert('Не удалось определить важную область.');
                 return;
             }
-
-            document.getElementById("summary-groups").style.display = "none";
-            document.getElementById("instructions-values").style.display = "block";
-            document.getElementById("values-sorting-area").style.display = "block";
-            document.getElementById("selected-group-title").innerHTML = "Вы выбрали область: <strong>" + topGroup.title + "</strong>. Теперь уточните, какие ценности особенно важны для вас в этой области.";
-
+            
+            document.getElementById('summary-groups').style.display = 'none';
+            document.getElementById('instructions-values').style.display = 'block';
+            document.getElementById('values-sorting-area').style.display = 'block';
+            document.getElementById('selected-group-title').innerHTML = `<strong>${topGroup.title}</strong>. Распределите ценности, связанные с этой областью.`;
+            
+            document.getElementById('modal-domain-name').textContent = topGroup.title;
+            
             initializeValuesCards();
         }
-
+        
         function initializeValuesCards() {
-            const highZone = document.getElementById("values-high");
-            const mediumZone = document.getElementById("values-medium");
-            const lowZone = document.getElementById("values-low");
-
+            const highZone = document.getElementById('values-high');
+            const mediumZone = document.getElementById('values-medium');
+            const lowZone = document.getElementById('values-low');
+            
             if (!highZone || !mediumZone || !lowZone) return;
-
-            highZone.innerHTML = "";
-            mediumZone.innerHTML = "";
-            lowZone.innerHTML = "";
-
+            
+            highZone.innerHTML = '';
+            mediumZone.innerHTML = '';
+            lowZone.innerHTML = '';
+            
             values40.forEach(value => {
-                const card = document.createElement("div");
-                card.className = "value-card";
+                const card = document.createElement('div');
+                card.className = 'value-card';
                 card.draggable = true;
                 card.dataset.id = value.id;
-                card.innerHTML = "<div class=\"value-card-title\">" + value.title + "</div><div class=\"value-card-desc\">" + value.desc + "</div>";
-                card.addEventListener("dragstart", handleDragStart);
-                card.addEventListener("dragend", handleDragEnd);
+                
+                if (value.id === 37) {
+                    card.classList.add('editable-card');
+                    card.innerHTML = `
+                        <span class="edit-icon">✏️</span>
+                        <div class="value-card-title">${value.title}</div>
+                        <div class="value-card-desc">${value.desc}</div>
+                    `;
+                    
+                    card.addEventListener('click', function(e) {
+                        if (!this.classList.contains('dragging')) {
+                            openEditModal(this);
+                        }
+                    });
+                } else {
+                    card.innerHTML = `
+                        <div class="value-card-title">${value.title}</div>
+                        <div class="value-card-desc">${value.desc}</div>
+                    `;
+                }
+                
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                
                 mediumZone.appendChild(card);
             });
-
+            
             setupDropZones();
         }
-
-        function resetValuesCards() {
-            if (confirm("Сбросить ценности?")) initializeValuesCards();
+        
+        function openEditModal(cardElement) {
+            const modal = document.getElementById('editValueModal');
+            const titleInput = document.getElementById('customValueTitle');
+            const descInput = document.getElementById('customValueDesc');
+            
+            const currentTitle = cardElement.querySelector('.value-card-title').textContent;
+            const currentDesc = cardElement.querySelector('.value-card-desc').textContent;
+            
+            titleInput.value = currentTitle === 'Другая ценность' ? '' : currentTitle;
+            descInput.value = currentDesc === 'Нажмите для добавления собственной ценности' ? '' : currentDesc;
+            
+            modal.classList.add('active');
+            titleInput.focus();
+            
+            const enterHandler = function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    saveCustomValue(cardElement);
+                }
+            };
+            
+            titleInput.removeEventListener('keydown', enterHandler);
+            descInput.removeEventListener('keydown', enterHandler);
+            
+            titleInput.addEventListener('keydown', enterHandler);
+            descInput.addEventListener('keydown', enterHandler);
+            
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeEditModal();
+                }
+            };
         }
-
+        
+        function saveCustomValue(cardElement) {
+            const titleInput = document.getElementById('customValueTitle');
+            const descInput = document.getElementById('customValueDesc');
+            
+            const newTitle = titleInput.value.trim();
+            const newDesc = descInput.value.trim();
+            
+            if (!newTitle) {
+                alert('Пожалуйста, введите название ценности');
+                titleInput.focus();
+                return;
+            }
+            
+            cardElement.querySelector('.value-card-title').textContent = newTitle;
+            cardElement.querySelector('.value-card-desc').textContent = newDesc || 'Пользовательская ценность';
+            
+            closeEditModal();
+            
+            const highZone = document.getElementById('values-high');
+            cardElement.draggable = true;
+            highZone.appendChild(cardElement);
+            
+            cardElement.onclick = function(e) {
+                if (!this.classList.contains('dragging')) {
+                    openEditModal(this);
+                }
+            };
+        }
+        
+        function closeEditModal() {
+            const modal = document.getElementById('editValueModal');
+            modal.classList.remove('active');
+        }
+        
+        function resetValuesCards() {
+            if (confirm('Вы уверены, что хотите сбросить все карточки ценностей?')) {
+                initializeValuesCards();
+            }
+        }
+        
         function proceedFromValuesSort() {
-            const highCards = Array.from(document.getElementById("values-high").querySelectorAll(".value-card"));
-
+            const highCards = Array.from(document.getElementById('values-high').querySelectorAll('.value-card'));
+            
             if (highCards.length > 4) {
                 needsRefinedSort = true;
                 showRefinedSort(highCards);
@@ -933,251 +1257,293 @@
                 showFinalValuesSummary();
             }
         }
-
+        
         function showRefinedSort(highCards) {
-            document.getElementById("values-sorting-area").style.display = "none";
-            document.getElementById("instructions-values").style.display = "none";
-            document.getElementById("instructions-refined").style.display = "block";
-            document.getElementById("refined-sorting-area").style.display = "block";
-
-            const titleHeading = document.getElementById("refined-title-heading");
-            titleHeading.textContent = "Шаг 5. Уточнение самых важных ценностей в контексте: " + (topGroup ? topGroup.title : "");
-
-            const refinedIntro = document.getElementById("refined-intro-text");
-            refinedIntro.innerHTML = "У вас выбрано " + highCards.length + " ценностей в категории \"Очень важно\". Теперь давайте уточним их приоритеты.";
-
-            const highestZone = document.getElementById("refined-highest");
-            const mediumZone = document.getElementById("refined-medium");
-            const lowZone = document.getElementById("refined-low");
-
-            highestZone.innerHTML = "";
-            mediumZone.innerHTML = "";
-            lowZone.innerHTML = "";
-
+            document.getElementById('values-sorting-area').style.display = 'none';
+            document.getElementById('instructions-values').style.display = 'none';
+            document.getElementById('instructions-refined').style.display = 'block';
+            document.getElementById('refined-sorting-area').style.display = 'block';
+            
+            const titleHeading = document.getElementById('refined-title-heading');
+            titleHeading.textContent = `Шаг 5. Уточнение${topGroup ? ' - ' + topGroup.title : ''}`;
+            
+            const refinedIntro = document.getElementById('refined-intro-text');
+            refinedIntro.innerHTML = `У вас выбрано ${highCards.length} важных ценностей. Распределите их по категориям.`;
+            
+            const highestZone = document.getElementById('refined-highest');
+            const mediumZone = document.getElementById('refined-medium');
+            const lowZone = document.getElementById('refined-low');
+            
+            highestZone.innerHTML = '';
+            mediumZone.innerHTML = '';
+            lowZone.innerHTML = '';
+            
             highCards.forEach(card => {
                 const newCard = card.cloneNode(true);
-                newCard.addEventListener("dragstart", handleDragStart);
-                newCard.addEventListener("dragend", handleDragEnd);
+                newCard.addEventListener('dragstart', handleDragStart);
+                newCard.addEventListener('dragend', handleDragEnd);
+                
+                if (newCard.classList.contains('editable-card')) {
+                    newCard.addEventListener('click', function(e) {
+                        if (!this.classList.contains('dragging')) {
+                            openEditModal(this);
+                        }
+                    });
+                }
+                
                 mediumZone.appendChild(newCard);
             });
-
+            
             setupDropZones();
         }
-
+        
         function resetRefinedCards() {
-            if (confirm("Сбросить распределение уточненных ценностей?")) {
-                const highCards = Array.from(document.getElementById("values-high").querySelectorAll(".value-card"));
+            if (confirm('Вы уверены, что хотите сбросить карточки?')) {
+                const highCards = Array.from(document.getElementById('values-high').querySelectorAll('.value-card'));
                 showRefinedSort(highCards);
             }
         }
-
+        
         function proceedFromRefinedSort() {
-            const highestCards = Array.from(document.getElementById("refined-highest").querySelectorAll(".value-card"));
-
+            const highestCards = Array.from(document.getElementById('refined-highest').querySelectorAll('.value-card'));
+            
             if (highestCards.length > 1) {
                 startValuesComparison(highestCards);
             } else {
                 showFinalValuesSummary();
             }
         }
-
+        
         function startValuesComparison(highestCards) {
             topValuesForComparison = highestCards.map(card => {
                 const id = parseInt(card.dataset.id);
-                return values40.find(v => v.id === id);
+                const title = card.querySelector('.value-card-title').textContent;
+                const desc = card.querySelector('.value-card-desc').textContent;
+                
+                // Для редактируемой карточки берем актуальные данные из DOM
+                return {
+                    id: id,
+                    title: title,
+                    desc: desc
+                };
             });
-
+            
             valuesComparisons = [];
             for (let i = 0; i < topValuesForComparison.length; i++) {
                 for (let j = i + 1; j < topValuesForComparison.length; j++) {
                     valuesComparisons.push([topValuesForComparison[i], topValuesForComparison[j]]);
                 }
             }
-
+            
             valuesComparisonResults = {};
-            topValuesForComparison.forEach(value => valuesComparisonResults[value.id] = 0);
+            topValuesForComparison.forEach(value => {
+                valuesComparisonResults[value.id] = 0;
+            });
+            
             currentValuesComparisonIndex = 0;
-
-            document.getElementById("instructions-refined").style.display = "none";
-            document.getElementById("refined-sorting-area").style.display = "none";
-            document.getElementById("instructions-values-comparison").style.display = "block";
-            document.getElementById("values-comparison-area").style.display = "block";
-
+            
+            document.getElementById('instructions-refined').style.display = 'none';
+            document.getElementById('refined-sorting-area').style.display = 'none';
+            document.getElementById('instructions-values-comparison').style.display = 'block';
+            document.getElementById('values-comparison-area').style.display = 'block';
+            
             showValuesComparison();
         }
-
+        
         function showValuesComparison() {
             if (currentValuesComparisonIndex >= valuesComparisons.length) {
-                rankedTopValues = topValuesForComparison.sort((a, b) => valuesComparisonResults[b.id] - valuesComparisonResults[a.id]);
+                rankedTopValues = topValuesForComparison.sort((a, b) => 
+                    valuesComparisonResults[b.id] - valuesComparisonResults[a.id]
+                );
                 showFinalValuesSummary();
                 return;
             }
-
-            const valueA = valuesComparisons[currentValuesComparisonIndex][0];
-            const valueB = valuesComparisons[currentValuesComparisonIndex][1];
-            document.getElementById("values-comparison-progress").textContent = "Вопрос " + (currentValuesComparisonIndex + 1) + " из " + valuesComparisons.length;
-
-            const cardsContainer = document.getElementById("values-comparison-cards");
-            cardsContainer.innerHTML = 
-                "<div class=\"comparison-card\" onclick=\"selectValueInComparison(" + valueA.id + ")\"><div class=\"comparison-card-title\">" + valueA.title + "</div><div class=\"comparison-card-questions\">" + valueA.desc + "</div></div>" +
-                "<div class=\"comparison-card\" onclick=\"selectValueInComparison(" + valueB.id + ")\"><div class=\"comparison-card-title\">" + valueB.title + "</div><div class=\"comparison-card-questions\">" + valueB.desc + "</div></div>";
+            
+            const [valueA, valueB] = valuesComparisons[currentValuesComparisonIndex];
+            
+            document.getElementById('values-comparison-progress').textContent = 
+                `Вопрос ${currentValuesComparisonIndex + 1} из ${valuesComparisons.length}`;
+            
+            const cardsContainer = document.getElementById('values-comparison-cards');
+            cardsContainer.innerHTML = `
+                <div class="comparison-card" onclick="selectValueInComparison(${valueA.id})">
+                    <div class="comparison-card-title">${valueA.title}</div>
+                    <div class="comparison-card-questions">${valueA.desc}</div>
+                </div>
+                <div class="comparison-card" onclick="selectValueInComparison(${valueB.id})">
+                    <div class="comparison-card-title">${valueB.title}</div>
+                    <div class="comparison-card-questions">${valueB.desc}</div>
+                </div>
+            `;
         }
-
+        
         function selectValueInComparison(selectedId) {
             valuesComparisonResults[selectedId]++;
             currentValuesComparisonIndex++;
             showValuesComparison();
         }
-
+        
         function backFromFinalSummary() {
-            document.getElementById("final-values-summary").style.display = "none";
-
+            document.getElementById('final-values-summary').style.display = 'none';
+            
             if (rankedTopValues.length > 0) {
-                document.getElementById("instructions-values-comparison").style.display = "block";
-                document.getElementById("values-comparison-area").style.display = "block";
+                document.getElementById('instructions-values-comparison').style.display = 'block';
+                document.getElementById('values-comparison-area').style.display = 'block';
             } else if (needsRefinedSort) {
-                document.getElementById("instructions-refined").style.display = "block";
-                document.getElementById("refined-sorting-area").style.display = "block";
+                document.getElementById('instructions-refined').style.display = 'block';
+                document.getElementById('refined-sorting-area').style.display = 'block';
             } else {
-                document.getElementById("instructions-values").style.display = "block";
-                document.getElementById("values-sorting-area").style.display = "block";
+                document.getElementById('instructions-values').style.display = 'block';
+                document.getElementById('values-sorting-area').style.display = 'block';
             }
         }
-
+        
         function showFinalValuesSummary() {
             let highestCards = [];
             let highCards = [];
-            let topValueName = "";
-
+            let topValueName = '';
+            
             if (rankedTopValues.length > 0) {
                 highestCards = rankedTopValues;
                 topValueName = rankedTopValues[0].title;
-                const otherHighCards = Array.from(document.getElementById("refined-medium").querySelectorAll(".value-card"))
+                
+                const otherHighCards = Array.from(document.getElementById('refined-medium').querySelectorAll('.value-card'))
                     .filter(card => !rankedTopValues.find(v => v.id === parseInt(card.dataset.id)));
                 highCards = otherHighCards;
             } else if (needsRefinedSort) {
-                highestCards = Array.from(document.getElementById("refined-highest").querySelectorAll(".value-card"));
+                highestCards = Array.from(document.getElementById('refined-highest').querySelectorAll('.value-card'));
                 if (highestCards.length > 0) {
-                    topValueName = highestCards[0].querySelector(".value-card-title").textContent;
+                    topValueName = highestCards[0].querySelector('.value-card-title').textContent;
                 }
-                highCards = Array.from(document.getElementById("refined-medium").querySelectorAll(".value-card"));
+                highCards = Array.from(document.getElementById('refined-medium').querySelectorAll('.value-card'));
             } else {
-                highCards = Array.from(document.getElementById("values-high").querySelectorAll(".value-card"));
+                highCards = Array.from(document.getElementById('values-high').querySelectorAll('.value-card'));
                 if (highCards.length > 0) {
-                    topValueName = highCards[0].querySelector(".value-card-title").textContent;
+                    topValueName = highCards[0].querySelector('.value-card-title').textContent;
                 }
             }
-
-            document.getElementById("domain-name").textContent = topGroup ? topGroup.title : "";
-            document.getElementById("top-value-name").textContent = topValueName;
-
-            let html = "";
-            if (topGroup) html += "<p style=\"margin-bottom: 20px;\">Область: <strong>" + topGroup.title + "</strong></p>";
-
-            if (highestCards.length > 0) {
-                html += "<div class=\"final-values-summary-section\"><h3>⭐ Важнее других (по приоритету)</h3><ul class=\"ranked-list\">";
+            
+            document.getElementById('domain-name').textContent = topGroup ? topGroup.title : '';
+            document.getElementById('top-value-name').textContent = topValueName;
+            
+            let html = '';
+            
+            if (topGroup) {
+                html += `<div class="final-values-summary-header"><strong>${topGroup.title}</strong></div>`;
+            }
+            
+            if (highestCards.length > 0 || rankedTopValues.length > 0) {
+                html += `<div class="final-values-summary-section"><h3>Самое важное</h3><ul class="ranked-list">`;
                 if (rankedTopValues.length > 0) {
-                    rankedTopValues.forEach(value => html += "<li>" + value.title + "</li>");
+                    rankedTopValues.forEach(value => {
+                        html += `<li>${value.title}</li>`;
+                    });
                 } else {
-                    highestCards.forEach(card => html += "<li>" + card.querySelector(".value-card-title").textContent + "</li>");
+                    highestCards.forEach(card => {
+                        html += `<li>${card.querySelector('.value-card-title').textContent}</li>`;
+                    });
                 }
-                html += "</ul></div>";
+                html += `</ul></div>`;
             }
-
+            
             if (highCards.length > 0) {
-                html += "<div class=\"final-values-summary-section\"><h3>🟢 Очень важно</h3><ul>";
+                html += `<div class="final-values-summary-section">`;
+                html += `<div class="final-values-group-label">`;
+                html += `<span class="final-values-group-dot"></span>`;
+                html += `<span>Очень важно</span>`;
+                html += `</div>`;
+                html += `<ul>`;
                 highCards.forEach(card => {
-                    const title = card.title || card.querySelector(".value-card-title").textContent;
-                    html += "<li>" + title + "</li>";
+                    const title = card.title || card.querySelector('.value-card-title').textContent;
+                    html += `<li>${title}</li>`;
                 });
-                html += "</ul></div>";
+                html += `</ul></div>`;
             }
-
-            document.getElementById("final-values-summary-content").innerHTML = html;
-            document.getElementById("values-sorting-area").style.display = "none";
-            document.getElementById("refined-sorting-area").style.display = "none";
-            document.getElementById("instructions-refined").style.display = "none";
-            document.getElementById("instructions-values-comparison").style.display = "none";
-            document.getElementById("values-comparison-area").style.display = "none";
-            document.getElementById("final-values-summary").style.display = "block";
+            
+            document.getElementById('final-values-summary-content').innerHTML = html;
+            
+            document.getElementById('values-sorting-area').style.display = 'none';
+            document.getElementById('refined-sorting-area').style.display = 'none';
+            document.getElementById('instructions-refined').style.display = 'none';
+            document.getElementById('instructions-values-comparison').style.display = 'none';
+            document.getElementById('values-comparison-area').style.display = 'none';
+            document.getElementById('final-values-summary').style.display = 'block';
         }
-
+        
         function saveFinalValuesResults() {
             let highestCards = [];
             let highCards = [];
-            let topValueName = "";
-
+            let topValueName = '';
+            
             if (rankedTopValues.length > 0) {
                 highestCards = rankedTopValues;
                 topValueName = rankedTopValues[0].title;
-                const otherHighCards = Array.from(document.getElementById("refined-medium").querySelectorAll(".value-card"))
+                
+                const otherHighCards = Array.from(document.getElementById('refined-medium').querySelectorAll('.value-card'))
                     .filter(card => !rankedTopValues.find(v => v.id === parseInt(card.dataset.id)));
                 highCards = otherHighCards;
             } else if (needsRefinedSort) {
-                highestCards = Array.from(document.getElementById("refined-highest").querySelectorAll(".value-card"));
+                highestCards = Array.from(document.getElementById('refined-highest').querySelectorAll('.value-card'));
                 if (highestCards.length > 0) {
-                    topValueName = highestCards[0].querySelector(".value-card-title").textContent;
+                    topValueName = highestCards[0].querySelector('.value-card-title').textContent;
                 }
-                highCards = Array.from(document.getElementById("refined-medium").querySelectorAll(".value-card"));
+                highCards = Array.from(document.getElementById('refined-medium').querySelectorAll('.value-card'));
             } else {
-                highCards = Array.from(document.getElementById("values-high").querySelectorAll(".value-card"));
+                highCards = Array.from(document.getElementById('values-high').querySelectorAll('.value-card'));
                 if (highCards.length > 0) {
-                    topValueName = highCards[0].querySelector(".value-card-title").textContent;
+                    topValueName = highCards[0].querySelector('.value-card-title').textContent;
                 }
             }
-
-            let text = "КОМПАС ЦЕННОСТЕЙ - РЕЗУЛЬТАТЫ\n";
-            text += "=================================\n\n";
-            text += "Область: " + (topGroup ? topGroup.title : "") + "\n\n";
-
+            
+            let text = '🎯 ОПРЕДЕЛЕНИЕ ЛИЧНЫХ ЦЕННОСТЕЙ\n';
+            text += '========================================\n\n';
+            text += `Выбранная область: ${topGroup ? topGroup.title : 'Не указана'}\n\n`;
+            
             if (highestCards.length > 0) {
-                text += "⭐ ВАЖНЕЕ ДРУГИХ (ПО ПРИОРИТЕТУ):\n";
-                text += "---------------------------------\n";
+                text += '📌 САМОЕ ВАЖНОЕ:\n';
+                text += '---------------------------------\n';
                 if (rankedTopValues.length > 0) {
-                    rankedTopValues.forEach((v, idx) => text += (idx + 1) + ". " + v.title + "\n");
+                    rankedTopValues.forEach((v, idx) => {
+                        text += `${idx + 1}. ${v.title}\n`;
+                    });
                 } else {
-                    highestCards.forEach(c => text += "- " + c.querySelector(".value-card-title").textContent + "\n");
+                    highestCards.forEach(c => {
+                        text += `• ${c.querySelector('.value-card-title').textContent}\n`;
+                    });
                 }
-                text += "\n";
+                text += '\n';
             }
-
+            
             if (highCards.length > 0) {
-                text += "🟢 ОЧЕНЬ ВАЖНО:\n";
-                text += "---------------\n";
+                text += '✅ ОЧЕНЬ ВАЖНО:\n';
+                text += '---------------\n';
                 highCards.forEach(c => {
-                    const title = c.title || c.querySelector(".value-card-title").textContent;
-                    text += "- " + title + "\n";
+                    const title = c.title || c.querySelector('.value-card-title').textContent;
+                    text += `• ${title}\n`;
                 });
-                text += "\n";
+                text += '\n';
             }
-
-            text += "\n";
-            text += "=================================\n";
-            text += "ПЕРЕХОД К ДЕЙСТВИЯМ (Committed Action)\n";
-            text += "=================================\n\n";
-            text += "1. Если в области \"" + (topGroup ? topGroup.title : "") + "\" вы живёте по ценности \"" + topValueName + "\",\n";
-            text += "   что вы делаете иначе на этой неделе (10–30 минут)?\n\n";
-            text += "   Ответ: ___________________________________________\n\n";
-            text += "2. Где/когда это будет (день, место, триггер),\n";
-            text += "   и как вы поймёте, что сделали?\n\n";
-            text += "   Ответ: ___________________________________________\n\n";
-            text += "3. Что помешает (мысли/эмоции/усталость/избегание),\n";
-            text += "   и что вы готовы взять с собой, чтобы всё равно сделать шаг?\n\n";
-            text += "   Ответ: ___________________________________________\n\n";
-            text += "\n";
-            text += "Дата: " + new Date().toLocaleDateString("ru-RU") + "\n";
-
-            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-            const link = document.createElement("a");
-            const fileName = "Компас_ценностей_" + new Date().toISOString().split("T")[0] + ".txt";
-
+            
+            text += '\n========================================\n';
+            text += 'COMMITTED ACTION\n';
+            text += '========================================\n\n';
+            text += `1. Подумайте о сфере "${topGroup ? topGroup.title : ''}" и ценности "${topValueName}", которая оказалась для вас наиболее важной.\n`;
+            text += `   За 10–30 минут опишите, что значит для вас жить в соответствии с этой ценностью?\n\n`;
+            text += `2. Что вы можете сделать уже на этой неделе, чтобы приблизиться к этой ценности,\n`;
+            text += `   сделать хотя бы небольшой шаг?\n\n`;
+            text += `3. Какие барьеры, мысли, эмоции могут помешать вам?\n\n`;
+            text += '\n========================================\n';
+            text += `Дата: ${new Date().toLocaleDateString('ru-RU')}\n`;
+            
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            const fileName = `ценности_${new Date().toISOString().split('T')[0]}.txt`;
             link.href = URL.createObjectURL(blob);
             link.download = fileName;
             link.click();
-
             URL.revokeObjectURL(link.href);
         }
-
+        
         window.onload = function() {
             initializeGroupCards();
             setupDropZones();
