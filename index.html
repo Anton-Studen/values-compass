@@ -656,7 +656,8 @@
     
     /* Мобильная карусель колонок */
     @media (max-width: 768px) {
-        .columns {
+        .columns-wrapper,
+        .values-columns {
             display: flex !important;
             flex-direction: row !important;
             gap: 0 !important;
@@ -665,26 +666,30 @@
             align-items: stretch !important;
         }
 
-        .column {
+        .column,
+        .values-column {
             min-height: 400px !important;
             transition: all 0.3s ease !important;
             flex-shrink: 0 !important;
         }
 
         /* Скрытая колонка */
-        .column.mobile-hidden {
+        .column.mobile-hidden,
+        .values-column.mobile-hidden {
             display: none !important;
         }
 
         /* Активная (центральная) колонка */
-        .column.mobile-active {
+        .column.mobile-active,
+        .values-column.mobile-active {
             flex: 1 !important;
             width: 100% !important;
             display: block !important;
         }
 
         /* Боковая кнопка (узкая полоса) */
-        .column.mobile-side-button {
+        .column.mobile-side-button,
+        .values-column.mobile-side-button {
             flex: 0 0 50px !important;
             width: 50px !important;
             min-width: 50px !important;
@@ -696,14 +701,19 @@
             position: relative !important;
         }
 
-        /* Скрыть карточки в боковых кнопках */
+        /* Скрыть карточки и drop-zone в боковых кнопках */
         .column.mobile-side-button .card,
-        .column.mobile-side-button .values-drop-zone {
+        .column.mobile-side-button .drop-zone,
+        .values-column.mobile-side-button .value-card,
+        .values-column.mobile-side-button .values-drop-zone {
             display: none !important;
         }
 
         /* Вертикальный текст для левой боковой кнопки (сверху вниз) */
-        .column.mobile-side-button.mobile-left h3 {
+        .column.mobile-side-button.mobile-left .column-header,
+        .column.mobile-side-button.mobile-left h3,
+        .values-column.mobile-side-button.mobile-left .values-column-header,
+        .values-column.mobile-side-button.mobile-left h3 {
             writing-mode: vertical-rl !important;
             text-orientation: mixed !important;
             transform: rotate(180deg) !important;
@@ -714,7 +724,10 @@
         }
 
         /* Вертикальный текст для правой боковой кнопки (снизу вверх) */
-        .column.mobile-side-button.mobile-right h3 {
+        .column.mobile-side-button.mobile-right .column-header,
+        .column.mobile-side-button.mobile-right h3,
+        .values-column.mobile-side-button.mobile-right .values-column-header,
+        .values-column.mobile-side-button.mobile-right h3 {
             writing-mode: vertical-rl !important;
             text-orientation: mixed !important;
             margin: 0 auto !important;
@@ -724,11 +737,13 @@
         }
 
         /* Добавим визуальную индикацию кликабельности */
-        .column.mobile-side-button:hover {
+        .column.mobile-side-button:hover,
+        .values-column.mobile-side-button:hover {
             opacity: 0.8 !important;
         }
 
-        .column.mobile-side-button:active {
+        .column.mobile-side-button:active,
+        .values-column.mobile-side-button:active {
             opacity: 0.6 !important;
         }
     }
@@ -1203,6 +1218,11 @@ const groupsData = [
             document.getElementById('modal-domain-name').textContent = topGroup.title;
             
             initializeValuesCards();
+            
+            // Инициализация мобильной навигации для values-container
+            setTimeout(() => {
+                initAllMobileNavigations();
+            }, 100);
         }
         
         function initializeValuesCards() {
@@ -1374,6 +1394,11 @@ const groupsData = [
             });
             
             setupDropZones();
+            
+            // Инициализация мобильной навигации для refined-sorting-container
+            setTimeout(() => {
+                initAllMobileNavigations();
+            }, 100);
         }
         
         function resetRefinedCards() {
@@ -1623,69 +1648,89 @@ const groupsData = [
             URL.revokeObjectURL(link.href);
         }
         
+        // Мобильная навигация между колонками
+        function initMobileColumnNavigation(containerSelector) {
+            if (window.innerWidth > 768) return; // Только для мобильных
+
+            const container = document.querySelector(containerSelector);
+            if (!container || container.style.display === 'none') return;
+
+            const columns = container.querySelectorAll('.column, .values-column');
+            if (columns.length !== 3) return;
+
+            // Проверяем, не инициализирована ли уже навигация для этого контейнера
+            if (container.dataset.mobileNavInit === 'true') return;
+            container.dataset.mobileNavInit = 'true';
+
+            let currentIndex = 1; // Начинаем со средней колонки
+
+            function updateColumnsView() {
+                columns.forEach((col, idx) => {
+                    col.classList.remove('mobile-hidden', 'mobile-active', 'mobile-side-button', 'mobile-left', 'mobile-right');
+                });
+
+                // Активная колонка
+                columns[currentIndex].classList.add('mobile-active');
+
+                // Левая кнопка (если есть колонка слева)
+                if (currentIndex > 0) {
+                    columns[currentIndex - 1].classList.add('mobile-side-button', 'mobile-left');
+                }
+
+                // Правая кнопка (если есть колонка справа)
+                if (currentIndex < columns.length - 1) {
+                    columns[currentIndex + 1].classList.add('mobile-side-button', 'mobile-right');
+                }
+
+                // Скрыть остальные
+                columns.forEach((col, idx) => {
+                    if (idx < currentIndex - 1 || idx > currentIndex + 1) {
+                        col.classList.add('mobile-hidden');
+                    }
+                });
+            }
+
+            // Обработчики кликов на боковые кнопки
+            columns.forEach((col, idx) => {
+                col.addEventListener('click', function(e) {
+                    if (this.classList.contains('mobile-side-button')) {
+                        currentIndex = idx;
+                        updateColumnsView();
+                    }
+                });
+            });
+
+            // Инициализация
+            updateColumnsView();
+        }
+
+        // Функция для инициализации всех видимых контейнеров
+        function initAllMobileNavigations() {
+            if (window.innerWidth > 768) return;
+
+            // Сбрасываем флаги инициализации
+            document.querySelectorAll('[data-mobile-nav-init]').forEach(el => {
+                el.dataset.mobileNavInit = 'false';
+            });
+
+            // Инициализируем навигацию для всех видимых контейнеров
+            initMobileColumnNavigation('.sorting-container');
+            initMobileColumnNavigation('.values-container');
+            initMobileColumnNavigation('.refined-sorting-container');
+        }
+
         window.onload = function() {
             initializeGroupCards();
             setupDropZones();
+            initAllMobileNavigations();
         };
-    </script>
 
-    <script>
-    // Мобильная навигация между колонками
-    function initMobileColumnNavigation() {
-        if (window.innerWidth > 768) return; // Только для мобильных
-
-        const columns = document.querySelectorAll('.column');
-        if (columns.length !== 3) return;
-
-        let currentIndex = 1; // Начинаем со средней колонки
-
-        function updateColumnsView() {
-            columns.forEach((col, idx) => {
-                col.classList.remove('mobile-hidden', 'mobile-active', 'mobile-side-button', 'mobile-left', 'mobile-right');
-            });
-
-            // Активная колонка
-            columns[currentIndex].classList.add('mobile-active');
-
-            // Левая кнопка (если есть колонка слева)
-            if (currentIndex > 0) {
-                columns[currentIndex - 1].classList.add('mobile-side-button', 'mobile-left');
+        // Переинициализация при изменении размера окна
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                initAllMobileNavigations();
             }
-
-            // Правая кнопка (если есть колонка справа)
-            if (currentIndex < columns.length - 1) {
-                columns[currentIndex + 1].classList.add('mobile-side-button', 'mobile-right');
-            }
-
-            // Скрыть остальные
-            columns.forEach((col, idx) => {
-                if (idx < currentIndex - 1 || idx > currentIndex + 1) {
-                    col.classList.add('mobile-hidden');
-                }
-            });
-        }
-
-        // Обработчики кликов на боковые кнопки
-        columns.forEach((col, idx) => {
-            col.addEventListener('click', function(e) {
-                if (this.classList.contains('mobile-side-button')) {
-                    currentIndex = idx;
-                    updateColumnsView();
-                }
-            });
         });
-
-        // Инициализация
-        updateColumnsView();
-    }
-
-    // Запуск при загрузке и изменении размера окна
-    window.addEventListener('load', initMobileColumnNavigation);
-    window.addEventListener('resize', function() {
-        if (window.innerWidth <= 768) {
-            initMobileColumnNavigation();
-        }
-    });
     </script>
 </body>
 </html>
