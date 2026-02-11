@@ -137,6 +137,7 @@
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             user-select: none;
+            touch-action: none;
         }
         
         .card:hover {
@@ -380,6 +381,7 @@
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             user-select: none;
+            touch-action: none;
         }
         
         .value-card:hover {
@@ -687,9 +689,9 @@
 
             .column.mobile-side-button,
             .values-column.mobile-side-button {
-                flex: 0 0 80px !important;
-                width: 80px !important;
-                min-width: 80px !important;
+                flex: 0 0 100px !important;
+                width: 100px !important;
+                min-width: 100px !important;
                 padding: 10px 5px !important;
                 cursor: pointer !important;
                 display: flex !important;
@@ -720,7 +722,8 @@
                 margin: 0 auto !important;
                 white-space: nowrap !important;
                 font-size: 16px !important;
-                padding: 15px 0 !important;
+                padding: 15px 8px !important;
+                min-height: 150px !important;
             }
 
             .column.mobile-side-button.mobile-right .column-header,
@@ -730,7 +733,8 @@
                 margin: 0 auto !important;
                 white-space: nowrap !important;
                 font-size: 16px !important;
-                padding: 15px 0 !important;
+                padding: 15px 8px !important;
+                min-height: 150px !important;
             }
 
             .column.mobile-side-button:active,
@@ -1042,27 +1046,32 @@ const groupsData = [
         }
         
         
-        // Простой Touch Drag-and-Drop для мобильных
+        // Универсальный Drag-and-Drop с Pointer Events (работает на всех устройствах)
         function addTouchDrag(card) {
+            // Проверяем, не добавлены ли уже события
+            if (card.dataset.touchDragEnabled === 'true') {
+                return;
+            }
+            card.dataset.touchDragEnabled = 'true';
+            
             let clone = null;
             let startX, startY, offsetX, offsetY;
             let isDragging = false;
+            let switchTimeout = null;
             
-            card.addEventListener('touchstart', function(e) {
-                const touch = e.touches[0];
+            card.addEventListener('pointerdown', function(e) {
                 const rect = card.getBoundingClientRect();
-                
-                startX = touch.clientX;
-                startY = touch.clientY;
-                offsetX = touch.clientX - rect.left;
-                offsetY = touch.clientY - rect.top;
+                startX = e.clientX;
+                startY = e.clientY;
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
                 isDragging = false;
-            }, { passive: true });
+                card.setPointerCapture(e.pointerId);
+            });
             
-            card.addEventListener('touchmove', function(e) {
-                const touch = e.touches[0];
-                const deltaX = Math.abs(touch.clientX - startX);
-                const deltaY = Math.abs(touch.clientY - startY);
+            card.addEventListener('pointermove', function(e) {
+                const deltaX = Math.abs(e.clientX - startX);
+                const deltaY = Math.abs(e.clientY - startY);
                 
                 if (!isDragging && (deltaX > 10 || deltaY > 10)) {
                     isDragging = true;
@@ -1081,37 +1090,118 @@ const groupsData = [
                 
                 if (!clone || !isDragging) return;
                 
-                if (e.cancelable) e.preventDefault();
-                
-                clone.style.left = (touch.clientX - offsetX) + 'px';
-                clone.style.top = (touch.clientY - offsetY) + 'px';
+                clone.style.left = (e.clientX - offsetX) + 'px';
+                clone.style.top = (e.clientY - offsetY) + 'px';
                 
                 clone.style.display = 'none';
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
                 clone.style.display = 'block';
                 
                 document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(z => z.classList.remove('drag-over'));
+                document.querySelectorAll('.mobile-side-button').forEach(btn => {
+                    btn.style.background = '';
+                    btn.style.transform = '';
+                });
                 
                 if (elementBelow) {
-                    let dropZone = elementBelow;
-                    while (dropZone && !dropZone.classList.contains('drop-zone') && !dropZone.classList.contains('values-drop-zone') && dropZone !== document.body) {
-                        dropZone = dropZone.parentElement;
+                    // Проверяем, не на боковой ли кнопке
+                    let sideButton = elementBelow;
+                    while (sideButton && !sideButton.classList.contains('mobile-side-button') && sideButton !== document.body) {
+                        sideButton = sideButton.parentElement;
                     }
-                    if (dropZone && (dropZone.classList.contains('drop-zone') || dropZone.classList.contains('values-drop-zone'))) {
-                        dropZone.classList.add('drag-over');
+                    
+                    if (sideButton && sideButton.classList.contains('mobile-side-button')) {
+                        // Наведены на боковую кнопку - подсвечиваем
+                        sideButton.style.background = 'rgba(102, 126, 234, 0.3)';
+                        sideButton.style.transform = 'scale(1.05)';
+                        
+                        // Находим drop-zone внутри боковой кнопки и подсвечиваем
+                        const dropZoneInside = sideButton.querySelector('.drop-zone, .values-drop-zone');
+                        if (dropZoneInside) {
+                            dropZoneInside.classList.add('drag-over');
+                        }
+                        
+                        if (!switchTimeout) {
+                            switchTimeout = setTimeout(() => {
+                                // Переключаем колонку
+                                const container = sideButton.closest('.columns-wrapper, .values-columns');
+                                if (container) {
+                                    const columns = Array.from(container.querySelectorAll('.column, .values-column'));
+                                    const targetIndex = columns.indexOf(sideButton);
+                                    
+                                    if (targetIndex !== -1) {
+                                        columns.forEach((col) => {
+                                            col.classList.remove('mobile-hidden', 'mobile-active', 'mobile-side-button', 'mobile-left', 'mobile-right');
+                                            col.style.background = '';
+                                            col.style.transform = '';
+                                        });
+                                        
+                                        columns[targetIndex].classList.add('mobile-active');
+                                        
+                                        if (targetIndex > 0) {
+                                            columns[targetIndex - 1].classList.add('mobile-side-button', 'mobile-left');
+                                        }
+                                        
+                                        if (targetIndex < columns.length - 1) {
+                                            columns[targetIndex + 1].classList.add('mobile-side-button', 'mobile-right');
+                                        }
+                                        
+                                        columns.forEach((col, idx) => {
+                                            if (idx < targetIndex - 1 || idx > targetIndex + 1) {
+                                                col.classList.add('mobile-hidden');
+                                            }
+                                        });
+                                    }
+                                }
+                                switchTimeout = null;
+                            }, 500); // 500ms задержка перед переключением
+                        }
+                    } else {
+                        // Не на боковой кнопке - сбрасываем таймер
+                        if (switchTimeout) {
+                            clearTimeout(switchTimeout);
+                            switchTimeout = null;
+                        }
+                        
+                        // Ищем drop-zone
+                        let dropZone = elementBelow;
+                        while (dropZone && !dropZone.classList.contains('drop-zone') && !dropZone.classList.contains('values-drop-zone') && dropZone !== document.body) {
+                            dropZone = dropZone.parentElement;
+                        }
+                        if (dropZone && (dropZone.classList.contains('drop-zone') || dropZone.classList.contains('values-drop-zone'))) {
+                            dropZone.classList.add('drag-over');
+                        }
                     }
                 }
-            }, { passive: false });
+            });
             
-            card.addEventListener('touchend', function(e) {
+            card.addEventListener('pointerup', function(e) {
                 if (!clone || !isDragging) {
                     isDragging = false;
+                    if (clone) {
+                        try {
+                            document.body.removeChild(clone);
+                        } catch(err) {}
+                        clone = null;
+                    }
+                    card.style.opacity = '1';
                     return;
                 }
                 
-                const touch = e.changedTouches[0];
+                // Очищаем таймер
+                if (switchTimeout) {
+                    clearTimeout(switchTimeout);
+                    switchTimeout = null;
+                }
+                
+                // Убираем подсветку боковых кнопок
+                document.querySelectorAll('.mobile-side-button').forEach(btn => {
+                    btn.style.background = '';
+                    btn.style.transform = '';
+                });
+                
                 clone.style.display = 'none';
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
                 clone.style.display = 'block';
                 
                 if (elementBelow) {
@@ -1124,23 +1214,47 @@ const groupsData = [
                     }
                 }
                 
-                document.body.removeChild(clone);
+                try {
+                    document.body.removeChild(clone);
+                } catch(err) {
+                    console.error('Error removing clone:', err);
+                }
                 clone = null;
                 card.style.opacity = '1';
                 isDragging = false;
                 document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(z => z.classList.remove('drag-over'));
-            }, { passive: true });
+            });
+            
+            // Обработчик для случая, когда pointer отменяется (например, при прокрутке)
+            card.addEventListener('pointercancel', function(e) {
+                if (clone) {
+                    try {
+                        document.body.removeChild(clone);
+                    } catch(err) {}
+                    clone = null;
+                }
+                card.style.opacity = '1';
+                isDragging = false;
+                if (switchTimeout) {
+                    clearTimeout(switchTimeout);
+                    switchTimeout = null;
+                }
+                document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(z => z.classList.remove('drag-over'));
+                document.querySelectorAll('.mobile-side-button').forEach(btn => {
+                    btn.style.background = '';
+                    btn.style.transform = '';
+                });
+            });
         }
         
         function createGroupCard(value) {
             const card = document.createElement('div');
             card.className = 'card';
-            card.draggable = true;
             card.dataset.id = value.id;
             card.innerHTML = `<div class="card-title">${value.title}</div><div class="card-questions">${value.questions}</div>`;
             card.addEventListener('dragstart', handleDragStart);
             card.addEventListener('dragend', handleDragEnd);
-            addTouchDrag(card); // Добавляем touch support
+            addTouchDrag(card); // Добавляем pointer support
             return card;
         }
         
@@ -1342,7 +1456,6 @@ const groupsData = [
             values40.forEach(value => {
                 const card = document.createElement('div');
                 card.className = 'value-card';
-                card.draggable = true;
                 card.dataset.id = value.id;
                 
                 if (value.id === 37) {
@@ -1367,9 +1480,9 @@ const groupsData = [
                 
                 card.addEventListener('dragstart', handleDragStart);
                 card.addEventListener('dragend', handleDragEnd);
-                addTouchDrag(newCard); // Добавляем touch support
+                addTouchDrag(card); // Добавляем pointer support
                 
-                mediumZone.appendChild(newCard);
+                mediumZone.appendChild(card);
             });
             
             setupDropZones();
@@ -1432,7 +1545,6 @@ const groupsData = [
             closeEditModal();
             
             const highZone = document.getElementById('values-high');
-            cardElement.draggable = true;
             highZone.appendChild(cardElement);
             
             cardElement.onclick = function(e) {
@@ -1705,6 +1817,38 @@ const groupsData = [
             
             let text = '🎯 ОПРЕДЕЛЕНИЕ ЛИЧНЫХ ЦЕННОСТЕЙ\n';
             text += '========================================\n\n';
+            
+            // Добавляем результаты Шага 3 (сортировка областей)
+            text += '📋 ШАГ 3: СОРТИРОВКА ОБЛАСТЕЙ ЖИЗНИ\n';
+            text += '---------------------------------\n\n';
+            
+            if (rankedHighGroups && rankedHighGroups.length > 0) {
+                text += '🔥 ОЧЕНЬ ВАЖНО:\n';
+                rankedHighGroups.forEach((group, idx) => {
+                    text += `${idx + 1}. ${group.title}\n`;
+                });
+                text += '\n';
+            }
+            
+            const mediumGroupCards = Array.from(document.getElementById('medium-importance').querySelectorAll('.card'));
+            if (mediumGroupCards.length > 0) {
+                text += '⚖️ СРЕДНЕ:\n';
+                mediumGroupCards.forEach(card => {
+                    text += `• ${card.querySelector('.card-title').textContent}\n`;
+                });
+                text += '\n';
+            }
+            
+            const lowGroupCards = Array.from(document.getElementById('low-importance').querySelectorAll('.card'));
+            if (lowGroupCards.length > 0) {
+                text += '📌 НЕ ВАЖНО:\n';
+                lowGroupCards.forEach(card => {
+                    text += `• ${card.querySelector('.card-title').textContent}\n`;
+                });
+                text += '\n';
+            }
+            
+            text += '========================================\n\n';
             text += `Выбранная область: ${topGroup ? topGroup.title : 'Не указана'}\n\n`;
             
             if (highestCards.length > 0) {
@@ -1795,6 +1939,11 @@ const groupsData = [
 
             columns.forEach((col, idx) => {
                 col.addEventListener('click', function(e) {
+                    // Игнорируем клики на карточках
+                    if (e.target.closest('.card') || e.target.closest('.value-card')) {
+                        return;
+                    }
+                    
                     if (this.classList.contains('mobile-side-button')) {
                         currentIndex = idx;
                         updateColumnsView();
