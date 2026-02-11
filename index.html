@@ -652,6 +652,112 @@
             .comparison-container {
                 padding: 20px;
             }
+            
+            .comparison-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Мобильная карусель колонок */
+            .columns-wrapper,
+            .values-columns {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+
+            .column,
+            .values-column {
+                min-height: 400px !important;
+                transition: all 0.3s ease !important;
+                flex-shrink: 0 !important;
+            }
+
+            .column.mobile-hidden,
+            .values-column.mobile-hidden {
+                display: none !important;
+            }
+
+            .column.mobile-active,
+            .values-column.mobile-active {
+                flex: 1 !important;
+                width: 100% !important;
+                display: block !important;
+            }
+
+            .column.mobile-side-button,
+            .values-column.mobile-side-button {
+                flex: 0 0 80px !important;
+                width: 80px !important;
+                min-width: 80px !important;
+                padding: 10px 5px !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                border-radius: 10px !important;
+            }
+
+            .column.mobile-side-button .card,
+            .values-column.mobile-side-button .value-card {
+                display: none !important;
+            }
+            
+            .column.mobile-side-button .drop-zone,
+            .values-column.mobile-side-button .values-drop-zone {
+                min-height: 100% !important;
+                border: none !important;
+                background: transparent !important;
+                padding: 5px !important;
+            }
+
+            .column.mobile-side-button.mobile-left .column-header,
+            .values-column.mobile-side-button.mobile-left .values-column-header {
+                writing-mode: vertical-rl !important;
+                text-orientation: mixed !important;
+                transform: rotate(180deg) !important;
+                margin: 0 auto !important;
+                white-space: nowrap !important;
+                font-size: 16px !important;
+                padding: 15px 0 !important;
+            }
+
+            .column.mobile-side-button.mobile-right .column-header,
+            .values-column.mobile-side-button.mobile-right .values-column-header {
+                writing-mode: vertical-rl !important;
+                text-orientation: mixed !important;
+                margin: 0 auto !important;
+                white-space: nowrap !important;
+                font-size: 16px !important;
+                padding: 15px 0 !important;
+            }
+
+            .column.mobile-side-button:active,
+            .values-column.mobile-side-button:active {
+                opacity: 0.6 !important;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .columns-wrapper,
+            .values-columns {
+                grid-template-columns: 1fr;
+            }
+            
+            .column,
+            .values-column {
+                min-height: auto;
+            }
+            
+            .drop-zone,
+            .values-drop-zone {
+                min-height: 200px;
+            }
+            
+            .comparison-cards {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1216,6 +1322,10 @@ const groupsData = [
             document.getElementById('modal-domain-name').textContent = topGroup.title;
             
             initializeValuesCards();
+            
+            setTimeout(() => {
+                initAllMobileNavigations();
+            }, 100);
         }
         
         function initializeValuesCards() {
@@ -1257,12 +1367,16 @@ const groupsData = [
                 
                 card.addEventListener('dragstart', handleDragStart);
                 card.addEventListener('dragend', handleDragEnd);
-                addTouchDrag(card); // Добавляем touch support
+                addTouchDrag(newCard); // Добавляем touch support
                 
-                mediumZone.appendChild(card);
+                mediumZone.appendChild(newCard);
             });
             
             setupDropZones();
+            
+            setTimeout(() => {
+                initAllMobileNavigations();
+            }, 100);
         }
         
         function openEditModal(cardElement) {
@@ -1638,10 +1752,82 @@ const groupsData = [
             URL.revokeObjectURL(link.href);
         }
         
+        
+        // Мобильная навигация между колонками
+        function initMobileColumnNavigation(containerSelector) {
+            if (window.innerWidth > 768) return;
+
+            const container = document.querySelector(containerSelector);
+            if (!container || getComputedStyle(container).display === 'none') return;
+
+            const wrapper = container.querySelector('.columns-wrapper, .values-columns');
+            if (!wrapper) return;
+
+            const columns = wrapper.querySelectorAll('.column, .values-column');
+            if (columns.length !== 3) return;
+
+            if (wrapper.dataset.mobileNavInit === 'true') return;
+            wrapper.dataset.mobileNavInit = 'true';
+
+            let currentIndex = 1;
+
+            function updateColumnsView() {
+                columns.forEach((col) => {
+                    col.classList.remove('mobile-hidden', 'mobile-active', 'mobile-side-button', 'mobile-left', 'mobile-right');
+                });
+
+                columns[currentIndex].classList.add('mobile-active');
+
+                if (currentIndex > 0) {
+                    columns[currentIndex - 1].classList.add('mobile-side-button', 'mobile-left');
+                }
+
+                if (currentIndex < columns.length - 1) {
+                    columns[currentIndex + 1].classList.add('mobile-side-button', 'mobile-right');
+                }
+
+                columns.forEach((col, idx) => {
+                    if (idx < currentIndex - 1 || idx > currentIndex + 1) {
+                        col.classList.add('mobile-hidden');
+                    }
+                });
+            }
+
+            columns.forEach((col, idx) => {
+                col.addEventListener('click', function(e) {
+                    if (this.classList.contains('mobile-side-button')) {
+                        currentIndex = idx;
+                        updateColumnsView();
+                    }
+                });
+            });
+
+            updateColumnsView();
+        }
+
+        function initAllMobileNavigations() {
+            if (window.innerWidth > 768) return;
+
+            document.querySelectorAll('[data-mobile-nav-init]').forEach(el => {
+                el.dataset.mobileNavInit = 'false';
+            });
+
+            initMobileColumnNavigation('.sorting-container');
+            initMobileColumnNavigation('.values-container');
+            initMobileColumnNavigation('.refined-sorting-container');
+        }
+        
         window.onload = function() {
             initializeGroupCards();
             setupDropZones();
+            initAllMobileNavigations();
         };
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                initAllMobileNavigations();
+            }
+        });
     </script>
 </body>
 </html>
