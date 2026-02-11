@@ -653,7 +653,89 @@
                 padding: 20px;
             }
         }
-    </style>
+    
+    /* Мобильная адаптация для колонок */
+    @media (max-width: 768px) {
+        .columns {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 5px !important;
+            width: 100% !important;
+        }
+
+        .column {
+            min-height: 400px !important;
+        }
+
+        /* Левая колонка - "Очень важно" */
+        .column:nth-child(1) {
+            flex: 0 0 50px !important;
+            width: 50px !important;
+            min-width: 50px !important;
+            padding: 10px 5px !important;
+        }
+
+        /* Центральная колонка - "Средне" */
+        .column:nth-child(2) {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+
+        /* Правая колонка - "Не важно" */
+        .column:nth-child(3) {
+            flex: 0 0 50px !important;
+            width: 50px !important;
+            min-width: 50px !important;
+            padding: 10px 5px !important;
+        }
+
+        /* Вертикальный текст для левой колонки (сверху вниз) */
+        .column:nth-child(1) h3 {
+            writing-mode: vertical-rl !important;
+            text-orientation: mixed !important;
+            transform: rotate(180deg) !important;
+            margin: 0 auto !important;
+            white-space: nowrap !important;
+            font-size: 14px !important;
+            padding: 10px 0 !important;
+        }
+
+        /* Вертикальный текст для правой колонки (снизу вверх) */
+        .column:nth-child(3) h3 {
+            writing-mode: vertical-rl !important;
+            text-orientation: mixed !important;
+            margin: 0 auto !important;
+            white-space: nowrap !important;
+            font-size: 14px !important;
+            padding: 10px 0 !important;
+        }
+
+        /* Карточки в боковых колонках */
+        .column:nth-child(1) .card,
+        .column:nth-child(3) .card {
+            font-size: 11px !important;
+            padding: 8px 4px !important;
+            margin: 5px 0 !important;
+            min-height: 60px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+
+        /* Центральная колонка - нормальные карточки */
+        .column:nth-child(2) .card {
+            margin: 10px 0 !important;
+        }
+
+        /* Уменьшаем заголовок центральной колонки на мобильном */
+        .column:nth-child(2) h3 {
+            font-size: 16px !important;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="container">
