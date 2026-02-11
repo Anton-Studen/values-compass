@@ -620,24 +620,7 @@
             display: none;
         }
         
-        @media (max-width: 1024px) {
-            .columns-wrapper,
-            .values-columns,
-            .comparison-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .column,
-            .values-column {
-                min-height: auto;
-            }
-            
-            .drop-zone,
-            .values-drop-zone {
-                min-height: 200px;
-            }
-        }
-        
+        /* Мобильная карусель колонок */
         @media (max-width: 768px) {
             header h1 {
                 font-size: 1.8em;
@@ -652,15 +635,30 @@
             .comparison-container {
                 padding: 20px;
             }
-        }
+            
+            .comparison-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Подсказка для мобильных */
+            .instructions::after {
+                content: "💡 Нажмите на боковую кнопку, чтобы переключить колонку";
+                display: block;
+                margin-top: 10px;
+                padding: 10px;
+                background: #fef3c7;
+                border-left: 4px solid #f59e0b;
+                border-radius: 5px;
+                font-size: 0.9em;
+                color: #92400e;
+            }
     
     /* Мобильная карусель колонок */
-    @media (max-width: 768px) {
         .columns-wrapper,
         .values-columns {
             display: flex !important;
             flex-direction: row !important;
-            gap: 0 !important;
+            gap: 10px !important;
             width: 100% !important;
             position: relative !important;
             align-items: stretch !important;
@@ -690,23 +688,39 @@
         /* Боковая кнопка (узкая полоса) */
         .column.mobile-side-button,
         .values-column.mobile-side-button {
-            flex: 0 0 50px !important;
-            width: 50px !important;
-            min-width: 50px !important;
+            flex: 0 0 80px !important;
+            width: 80px !important;
+            min-width: 80px !important;
             padding: 10px 5px !important;
             cursor: pointer !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             position: relative !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 10px !important;
         }
 
-        /* Скрыть карточки и drop-zone в боковых кнопках */
+        /* Скрыть карточки в боковых кнопках, но оставить drop-zone видимой */
         .column.mobile-side-button .card,
-        .column.mobile-side-button .drop-zone,
-        .values-column.mobile-side-button .value-card,
-        .values-column.mobile-side-button .values-drop-zone {
+        .values-column.mobile-side-button .value-card {
             display: none !important;
+        }
+        
+        .column.mobile-side-button .drop-zone,
+        .values-column.mobile-side-button .values-drop-zone {
+            min-height: 100% !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 5px !important;
+        }
+        
+        /* Показываем индикатор при наведении карточки на боковую кнопку */
+        .column.mobile-side-button .drop-zone.drag-over,
+        .values-column.mobile-side-button .values-drop-zone.drag-over {
+            background: rgba(102, 126, 234, 0.3) !important;
+            border: 2px dashed #667eea !important;
+            border-radius: 8px !important;
         }
 
         /* Вертикальный текст для левой боковой кнопки (сверху вниз) */
@@ -719,8 +733,8 @@
             transform: rotate(180deg) !important;
             margin: 0 auto !important;
             white-space: nowrap !important;
-            font-size: 14px !important;
-            padding: 10px 0 !important;
+            font-size: 16px !important;
+            padding: 15px 0 !important;
         }
 
         /* Вертикальный текст для правой боковой кнопки (снизу вверх) */
@@ -732,8 +746,8 @@
             text-orientation: mixed !important;
             margin: 0 auto !important;
             white-space: nowrap !important;
-            font-size: 14px !important;
-            padding: 10px 0 !important;
+            font-size: 16px !important;
+            padding: 15px 0 !important;
         }
 
         /* Добавим визуальную индикацию кликабельности */
@@ -745,6 +759,28 @@
         .column.mobile-side-button:active,
         .values-column.mobile-side-button:active {
             opacity: 0.6 !important;
+        }
+    }
+    
+    /* Планшеты */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .columns-wrapper,
+        .values-columns {
+            grid-template-columns: 1fr;
+        }
+        
+        .column,
+        .values-column {
+            min-height: auto;
+        }
+        
+        .drop-zone,
+        .values-drop-zone {
+            min-height: 200px;
+        }
+        
+        .comparison-cards {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -993,7 +1029,10 @@ const groupsData = [
         ];
         
         let draggedElement = null;
-        let highImportanceGroups = [];
+        let touchDraggedElement = null;
+        let touchClone = null;
+        
+        function initializeGroupCards() {
         let comparisons = [];
         let currentComparisonIndex = 0;
         let comparisonResults = {};
@@ -1037,6 +1076,10 @@ const groupsData = [
             card.innerHTML = `<div class="card-title">${value.title}</div><div class="card-questions">${value.questions}</div>`;
             card.addEventListener('dragstart', handleDragStart);
             card.addEventListener('dragend', handleDragEnd);
+            
+            // Touch events для мобильных устройств
+            enableTouchDrag(card);
+            
             return card;
         }
         
@@ -1265,6 +1308,9 @@ const groupsData = [
                 card.addEventListener('dragstart', handleDragStart);
                 card.addEventListener('dragend', handleDragEnd);
                 
+                // Touch events для мобильных устройств
+                enableTouchDrag(card);
+                
                 mediumZone.appendChild(card);
             });
             
@@ -1381,6 +1427,9 @@ const groupsData = [
                 const newCard = card.cloneNode(true);
                 newCard.addEventListener('dragstart', handleDragStart);
                 newCard.addEventListener('dragend', handleDragEnd);
+                
+                // Touch events для мобильных устройств
+                enableTouchDrag(newCard);
                 
                 if (newCard.classList.contains('editable-card')) {
                     newCard.addEventListener('click', function(e) {
@@ -1653,14 +1702,31 @@ const groupsData = [
             if (window.innerWidth > 768) return; // Только для мобильных
 
             const container = document.querySelector(containerSelector);
-            if (!container || container.style.display === 'none') return;
+            if (!container || getComputedStyle(container).display === 'none') {
+                console.log('Container not found or hidden:', containerSelector);
+                return;
+            }
 
-            const columns = container.querySelectorAll('.column, .values-column');
-            if (columns.length !== 3) return;
+            // Ищем колонки внутри columns-wrapper или values-columns
+            const wrapper = container.querySelector('.columns-wrapper, .values-columns');
+            if (!wrapper) {
+                console.log('Wrapper not found in:', containerSelector);
+                return;
+            }
+
+            const columns = wrapper.querySelectorAll('.column, .values-column');
+            if (columns.length !== 3) {
+                console.log('Not 3 columns found in', containerSelector, '- found:', columns.length);
+                return;
+            }
 
             // Проверяем, не инициализирована ли уже навигация для этого контейнера
-            if (container.dataset.mobileNavInit === 'true') return;
-            container.dataset.mobileNavInit = 'true';
+            if (wrapper.dataset.mobileNavInit === 'true') {
+                console.log('Already initialized:', containerSelector);
+                return;
+            }
+            wrapper.dataset.mobileNavInit = 'true';
+            console.log('Initializing mobile navigation for:', containerSelector);
 
             let currentIndex = 1; // Начинаем со средней колонки
 
@@ -1688,16 +1754,78 @@ const groupsData = [
                         col.classList.add('mobile-hidden');
                     }
                 });
+                
+                console.log('Updated view, current index:', currentIndex);
             }
 
             // Обработчики кликов на боковые кнопки
+            let isDragging = false;
+            let dragTimeout = null;
+            
             columns.forEach((col, idx) => {
+                // Отслеживаем начало драга
+                col.addEventListener('dragstart', function(e) {
+                    isDragging = true;
+                }, true);
+                
+                // Отслеживаем конец драга
+                col.addEventListener('dragend', function(e) {
+                    setTimeout(() => {
+                        isDragging = false;
+                    }, 100);
+                }, true);
+                
+                // Переключение колонки по клику (но не во время drag)
                 col.addEventListener('click', function(e) {
-                    if (this.classList.contains('mobile-side-button')) {
+                    if (this.classList.contains('mobile-side-button') && !isDragging) {
                         currentIndex = idx;
                         updateColumnsView();
                     }
                 });
+                
+                // Переключение колонки при dragover на боковую кнопку
+                col.addEventListener('dragover', function(e) {
+                    if (this.classList.contains('mobile-side-button') && draggedElement) {
+                        e.preventDefault();
+                        
+                        // Используем debounce для предотвращения множественных переключений
+                        if (dragTimeout) clearTimeout(dragTimeout);
+                        
+                        dragTimeout = setTimeout(() => {
+                            if (currentIndex !== idx) {
+                                currentIndex = idx;
+                                updateColumnsView();
+                            }
+                        }, 200);
+                    }
+                }, true);
+                
+                // Touch events для мобильных устройств
+                let touchStartX = 0;
+                let touchStartY = 0;
+                
+                col.addEventListener('touchstart', function(e) {
+                    if (this.classList.contains('mobile-side-button')) {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                    }
+                }, { passive: true });
+                
+                col.addEventListener('touchend', function(e) {
+                    if (this.classList.contains('mobile-side-button')) {
+                        const touchEndX = e.changedTouches[0].clientX;
+                        const touchEndY = e.changedTouches[0].clientY;
+                        
+                        // Проверяем, что это был клик, а не свайп
+                        const deltaX = Math.abs(touchEndX - touchStartX);
+                        const deltaY = Math.abs(touchEndY - touchStartY);
+                        
+                        if (deltaX < 10 && deltaY < 10) {
+                            currentIndex = idx;
+                            updateColumnsView();
+                        }
+                    }
+                }, { passive: true });
             });
 
             // Инициализация
@@ -1706,7 +1834,12 @@ const groupsData = [
 
         // Функция для инициализации всех видимых контейнеров
         function initAllMobileNavigations() {
-            if (window.innerWidth > 768) return;
+            if (window.innerWidth > 768) {
+                console.log('Desktop mode, width:', window.innerWidth);
+                return;
+            }
+            
+            console.log('Mobile mode activated, width:', window.innerWidth);
 
             // Сбрасываем флаги инициализации
             document.querySelectorAll('[data-mobile-nav-init]').forEach(el => {
@@ -1719,6 +1852,178 @@ const groupsData = [
             initMobileColumnNavigation('.refined-sorting-container');
         }
 
+        // Touch Drag-and-Drop для мобильных устройств
+        function enableTouchDrag(card) {
+            let startX, startY, offsetX, offsetY;
+            let clone = null;
+            let currentDropZone = null;
+            let switchTimeout = null;
+            
+            card.addEventListener('touchstart', function(e) {
+                const touch = e.touches[0];
+                const rect = card.getBoundingClientRect();
+                
+                startX = touch.clientX;
+                startY = touch.clientY;
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+                
+                // Создаем клон карточки
+                clone = card.cloneNode(true);
+                clone.style.position = 'fixed';
+                clone.style.zIndex = '10000';
+                clone.style.width = rect.width + 'px';
+                clone.style.opacity = '0.8';
+                clone.style.pointerEvents = 'none';
+                clone.style.left = (touch.clientX - offsetX) + 'px';
+                clone.style.top = (touch.clientY - offsetY) + 'px';
+                document.body.appendChild(clone);
+                
+                card.style.opacity = '0.3';
+                touchDraggedElement = card;
+            }, { passive: true });
+            
+            card.addEventListener('touchmove', function(e) {
+                if (!clone) return;
+                
+                e.preventDefault();
+                const touch = e.touches[0];
+                
+                // Двигаем клон
+                clone.style.left = (touch.clientX - offsetX) + 'px';
+                clone.style.top = (touch.clientY - offsetY) + 'px';
+                
+                // Находим элемент под пальцем
+                clone.style.display = 'none';
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                clone.style.display = 'block';
+                
+                // Убираем предыдущую подсветку
+                if (currentDropZone) {
+                    currentDropZone.classList.remove('drag-over');
+                }
+                
+                // Проверяем, не наведены ли мы на боковую кнопку
+                let sideButton = elementBelow;
+                while (sideButton && !sideButton.classList.contains('mobile-side-button')) {
+                    sideButton = sideButton.parentElement;
+                }
+                
+                if (sideButton && sideButton.classList.contains('mobile-side-button')) {
+                    // Наведены на боковую кнопку - переключаем колонку с задержкой
+                    if (!switchTimeout) {
+                        sideButton.style.background = 'rgba(102, 126, 234, 0.3)';
+                        
+                        switchTimeout = setTimeout(() => {
+                            // Находим индекс этой колонки и переключаем
+                            const container = sideButton.closest('.columns-wrapper, .values-columns');
+                            if (container) {
+                                const columns = Array.from(container.querySelectorAll('.column, .values-column'));
+                                const targetIndex = columns.indexOf(sideButton);
+                                
+                                if (targetIndex !== -1) {
+                                    // Переключаем колонку
+                                    columns.forEach((col, idx) => {
+                                        col.classList.remove('mobile-hidden', 'mobile-active', 'mobile-side-button', 'mobile-left', 'mobile-right');
+                                    });
+                                    
+                                    columns[targetIndex].classList.add('mobile-active');
+                                    
+                                    if (targetIndex > 0) {
+                                        columns[targetIndex - 1].classList.add('mobile-side-button', 'mobile-left');
+                                    }
+                                    
+                                    if (targetIndex < columns.length - 1) {
+                                        columns[targetIndex + 1].classList.add('mobile-side-button', 'mobile-right');
+                                    }
+                                    
+                                    columns.forEach((col, idx) => {
+                                        if (idx < targetIndex - 1 || idx > targetIndex + 1) {
+                                            col.classList.add('mobile-hidden');
+                                        }
+                                    });
+                                }
+                            }
+                        }, 500); // Задержка 500ms перед переключением
+                    }
+                } else {
+                    // Не на боковой кнопке - сбрасываем таймер
+                    if (switchTimeout) {
+                        clearTimeout(switchTimeout);
+                        switchTimeout = null;
+                    }
+                    
+                    // Убираем подсветку со всех боковых кнопок
+                    document.querySelectorAll('.mobile-side-button').forEach(btn => {
+                        btn.style.background = '';
+                    });
+                    
+                    // Находим ближайшую drop-zone
+                    let dropZone = elementBelow;
+                    while (dropZone && !dropZone.classList.contains('drop-zone') && !dropZone.classList.contains('values-drop-zone')) {
+                        dropZone = dropZone.parentElement;
+                    }
+                    
+                    if (dropZone && (dropZone.classList.contains('drop-zone') || dropZone.classList.contains('values-drop-zone'))) {
+                        // Проверяем, что drop-zone в активной колонке
+                        const column = dropZone.closest('.column, .values-column');
+                        if (column && column.classList.contains('mobile-active')) {
+                            dropZone.classList.add('drag-over');
+                            currentDropZone = dropZone;
+                        }
+                    } else {
+                        currentDropZone = null;
+                    }
+                }
+            }, { passive: false });
+            
+            card.addEventListener('touchend', function(e) {
+                if (!clone) return;
+                
+                // Очищаем таймер переключения
+                if (switchTimeout) {
+                    clearTimeout(switchTimeout);
+                    switchTimeout = null;
+                }
+                
+                // Убираем подсветку со всех боковых кнопок
+                document.querySelectorAll('.mobile-side-button').forEach(btn => {
+                    btn.style.background = '';
+                });
+                
+                const touch = e.changedTouches[0];
+                
+                // Находим drop-zone
+                clone.style.display = 'none';
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                clone.style.display = 'block';
+                
+                let dropZone = elementBelow;
+                while (dropZone && !dropZone.classList.contains('drop-zone') && !dropZone.classList.contains('values-drop-zone')) {
+                    dropZone = dropZone.parentElement;
+                }
+                
+                // Перемещаем карточку только если drop-zone в активной колонке
+                if (dropZone && (dropZone.classList.contains('drop-zone') || dropZone.classList.contains('values-drop-zone'))) {
+                    const column = dropZone.closest('.column, .values-column');
+                    if (column && column.classList.contains('mobile-active')) {
+                        dropZone.appendChild(card);
+                    }
+                }
+                
+                // Очищаем
+                document.body.removeChild(clone);
+                clone = null;
+                card.style.opacity = '1';
+                touchDraggedElement = null;
+                
+                // Убираем подсветку
+                document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(zone => {
+                    zone.classList.remove('drag-over');
+                });
+            }, { passive: true });
+        }
+        
         window.onload = function() {
             initializeGroupCards();
             setupDropZones();
