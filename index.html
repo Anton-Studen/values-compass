@@ -654,43 +654,56 @@
             }
         }
     
-    /* Мобильная адаптация для колонок */
+    /* Мобильная карусель колонок */
     @media (max-width: 768px) {
         .columns {
             display: flex !important;
             flex-direction: row !important;
-            gap: 5px !important;
+            gap: 0 !important;
             width: 100% !important;
+            position: relative !important;
+            align-items: stretch !important;
         }
 
         .column {
             min-height: 400px !important;
+            transition: all 0.3s ease !important;
+            flex-shrink: 0 !important;
         }
 
-        /* Левая колонка - "Очень важно" */
-        .column:nth-child(1) {
-            flex: 0 0 50px !important;
-            width: 50px !important;
-            min-width: 50px !important;
-            padding: 10px 5px !important;
+        /* Скрытая колонка */
+        .column.mobile-hidden {
+            display: none !important;
         }
 
-        /* Центральная колонка - "Средне" */
-        .column:nth-child(2) {
+        /* Активная (центральная) колонка */
+        .column.mobile-active {
             flex: 1 !important;
-            min-width: 0 !important;
+            width: 100% !important;
+            display: block !important;
         }
 
-        /* Правая колонка - "Не важно" */
-        .column:nth-child(3) {
+        /* Боковая кнопка (узкая полоса) */
+        .column.mobile-side-button {
             flex: 0 0 50px !important;
             width: 50px !important;
             min-width: 50px !important;
             padding: 10px 5px !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
         }
 
-        /* Вертикальный текст для левой колонки (сверху вниз) */
-        .column:nth-child(1) h3 {
+        /* Скрыть карточки в боковых кнопках */
+        .column.mobile-side-button .card,
+        .column.mobile-side-button .values-drop-zone {
+            display: none !important;
+        }
+
+        /* Вертикальный текст для левой боковой кнопки (сверху вниз) */
+        .column.mobile-side-button.mobile-left h3 {
             writing-mode: vertical-rl !important;
             text-orientation: mixed !important;
             transform: rotate(180deg) !important;
@@ -700,8 +713,8 @@
             padding: 10px 0 !important;
         }
 
-        /* Вертикальный текст для правой колонки (снизу вверх) */
-        .column:nth-child(3) h3 {
+        /* Вертикальный текст для правой боковой кнопки (снизу вверх) */
+        .column.mobile-side-button.mobile-right h3 {
             writing-mode: vertical-rl !important;
             text-orientation: mixed !important;
             margin: 0 auto !important;
@@ -710,29 +723,13 @@
             padding: 10px 0 !important;
         }
 
-        /* Карточки в боковых колонках */
-        .column:nth-child(1) .card,
-        .column:nth-child(3) .card {
-            font-size: 11px !important;
-            padding: 8px 4px !important;
-            margin: 5px 0 !important;
-            min-height: 60px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            text-align: center !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
+        /* Добавим визуальную индикацию кликабельности */
+        .column.mobile-side-button:hover {
+            opacity: 0.8 !important;
         }
 
-        /* Центральная колонка - нормальные карточки */
-        .column:nth-child(2) .card {
-            margin: 10px 0 !important;
-        }
-
-        /* Уменьшаем заголовок центральной колонки на мобильном */
-        .column:nth-child(2) h3 {
-            font-size: 16px !important;
+        .column.mobile-side-button:active {
+            opacity: 0.6 !important;
         }
     }
 </style>
@@ -1630,6 +1627,65 @@ const groupsData = [
             initializeGroupCards();
             setupDropZones();
         };
+    </script>
+
+    <script>
+    // Мобильная навигация между колонками
+    function initMobileColumnNavigation() {
+        if (window.innerWidth > 768) return; // Только для мобильных
+
+        const columns = document.querySelectorAll('.column');
+        if (columns.length !== 3) return;
+
+        let currentIndex = 1; // Начинаем со средней колонки
+
+        function updateColumnsView() {
+            columns.forEach((col, idx) => {
+                col.classList.remove('mobile-hidden', 'mobile-active', 'mobile-side-button', 'mobile-left', 'mobile-right');
+            });
+
+            // Активная колонка
+            columns[currentIndex].classList.add('mobile-active');
+
+            // Левая кнопка (если есть колонка слева)
+            if (currentIndex > 0) {
+                columns[currentIndex - 1].classList.add('mobile-side-button', 'mobile-left');
+            }
+
+            // Правая кнопка (если есть колонка справа)
+            if (currentIndex < columns.length - 1) {
+                columns[currentIndex + 1].classList.add('mobile-side-button', 'mobile-right');
+            }
+
+            // Скрыть остальные
+            columns.forEach((col, idx) => {
+                if (idx < currentIndex - 1 || idx > currentIndex + 1) {
+                    col.classList.add('mobile-hidden');
+                }
+            });
+        }
+
+        // Обработчики кликов на боковые кнопки
+        columns.forEach((col, idx) => {
+            col.addEventListener('click', function(e) {
+                if (this.classList.contains('mobile-side-button')) {
+                    currentIndex = idx;
+                    updateColumnsView();
+                }
+            });
+        });
+
+        // Инициализация
+        updateColumnsView();
+    }
+
+    // Запуск при загрузке и изменении размера окна
+    window.addEventListener('load', initMobileColumnNavigation);
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            initMobileColumnNavigation();
+        }
+    });
     </script>
 </body>
 </html>
