@@ -666,6 +666,7 @@
                 flex-direction: row !important;
                 gap: 10px !important;
                 width: 100% !important;
+                align-items: stretch !important;
             }
 
             .column,
@@ -684,7 +685,8 @@
             .values-column.mobile-active {
                 flex: 1 !important;
                 width: 100% !important;
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
 
             .column.mobile-side-button,
@@ -695,10 +697,11 @@
                 padding: 10px 5px !important;
                 cursor: pointer !important;
                 display: flex !important;
-                align-items: center !important;
+                align-items: stretch !important;
                 justify-content: center !important;
                 background: rgba(255, 255, 255, 0.95) !important;
                 border-radius: 10px !important;
+                min-height: 100% !important;
             }
 
             .column.mobile-side-button .card,
@@ -709,9 +712,13 @@
             .column.mobile-side-button .drop-zone,
             .values-column.mobile-side-button .values-drop-zone {
                 min-height: 100% !important;
+                height: 100% !important;
                 border: none !important;
                 background: transparent !important;
                 padding: 5px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             .column.mobile-side-button.mobile-left .column-header,
@@ -719,22 +726,28 @@
                 writing-mode: vertical-rl !important;
                 text-orientation: mixed !important;
                 transform: rotate(180deg) !important;
-                margin: 0 auto !important;
+                margin: 0 !important;
                 white-space: nowrap !important;
                 font-size: 16px !important;
                 padding: 15px 8px !important;
-                min-height: 150px !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             .column.mobile-side-button.mobile-right .column-header,
             .values-column.mobile-side-button.mobile-right .values-column-header {
                 writing-mode: vertical-rl !important;
                 text-orientation: mixed !important;
-                margin: 0 auto !important;
+                margin: 0 !important;
                 white-space: nowrap !important;
                 font-size: 16px !important;
                 padding: 15px 8px !important;
-                min-height: 150px !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             .column.mobile-side-button:active,
