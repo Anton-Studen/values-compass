@@ -674,6 +674,8 @@
                 min-height: 400px !important;
                 transition: all 0.3s ease !important;
                 flex-shrink: 0 !important;
+                /* По умолчанию скрываем все колонки до инициализации */
+                display: none !important;
             }
 
             .column.mobile-hidden,
@@ -1979,10 +1981,32 @@ const groupsData = [
             initMobileColumnNavigation('.refined-sorting-container');
         }
         
+        // Принудительная инициализация мобильной навигации
+        function forceMobileInit() {
+            if (window.innerWidth <= 768) {
+                // Небольшая задержка для применения CSS
+                setTimeout(() => {
+                    initAllMobileNavigations();
+                }, 50);
+            }
+        }
+        
         window.onload = function() {
             initializeGroupCards();
             setupDropZones();
-            initAllMobileNavigations();
+            forceMobileInit();
+        };
+        
+        // Переинициализация при изменении размера окна
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (window.innerWidth <= 768) {
+                    initAllMobileNavigations();
+                }
+            }, 100);
+        });
         };
 
         window.addEventListener('resize', function() {
