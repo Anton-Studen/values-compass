@@ -1046,14 +1046,23 @@ const groupsData = [
             mediumZone.innerHTML = '';
             lowZone.innerHTML = '';
             
+            const isMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+            
             groupsData.forEach((value, index) => {
                 const card = createGroupCard(value);
-                if (index % 3 === 0) {
-                    highZone.appendChild(card);
-                } else if (index % 3 === 1) {
+                
+                if (isMobile) {
+                    // На мобильных все карточки в среднюю колонку
                     mediumZone.appendChild(card);
                 } else {
-                    lowZone.appendChild(card);
+                    // На десктопе распределяем по трем колонкам
+                    if (index % 3 === 0) {
+                        highZone.appendChild(card);
+                    } else if (index % 3 === 1) {
+                        mediumZone.appendChild(card);
+                    } else {
+                        lowZone.appendChild(card);
+                    }
                 }
             });
         }
@@ -2012,10 +2021,25 @@ const groupsData = [
         
         // Переинициализация при изменении размера окна
         let resizeTimer;
+        let lastIsMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+        
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
                 const isMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+                
+                // Если изменился режим (мобильный <-> десктоп), переинициализируем карточки
+                if (isMobile !== lastIsMobile) {
+                    lastIsMobile = isMobile;
+                    
+                    // Переинициализируем карточки групп если они видны
+                    const sortingArea = document.getElementById('sorting-area');
+                    if (sortingArea && getComputedStyle(sortingArea).display !== 'none') {
+                        initializeGroupCards();
+                        setupDropZones();
+                    }
+                }
+                
                 if (isMobile) {
                     initAllMobileNavigations();
                 }
