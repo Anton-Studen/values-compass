@@ -640,7 +640,7 @@
             }
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 768px), (max-width: 1024px) and (hover: none) {
             header h1 {
                 font-size: 1.8em;
             }
@@ -674,8 +674,6 @@
                 min-height: 400px !important;
                 transition: all 0.3s ease !important;
                 flex-shrink: 0 !important;
-                /* По умолчанию скрываем все колонки до инициализации */
-                display: none !important;
             }
 
             .column.mobile-hidden,
@@ -1914,7 +1912,8 @@ const groupsData = [
         
         // Мобильная навигация между колонками
         function initMobileColumnNavigation(containerSelector) {
-            if (window.innerWidth > 768) return;
+            const isMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+            if (!isMobile) return;
 
             const container = document.querySelector(containerSelector);
             if (!container || getComputedStyle(container).display === 'none') return;
@@ -1970,7 +1969,10 @@ const groupsData = [
         }
 
         function initAllMobileNavigations() {
-            if (window.innerWidth > 768) return;
+            // Проверяем и ширину, и touch-устройство
+            const isMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+            
+            if (!isMobile) return;
 
             document.querySelectorAll('[data-mobile-nav-init]').forEach(el => {
                 el.dataset.mobileNavInit = 'false';
@@ -1983,11 +1985,15 @@ const groupsData = [
         
         // Принудительная инициализация мобильной навигации
         function forceMobileInit() {
-            if (window.innerWidth <= 768) {
-                // Небольшая задержка для применения CSS
+            const isMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+            
+            if (isMobile) {
+                // Синхронная инициализация без задержки
+                initAllMobileNavigations();
+                // Дополнительная проверка через небольшую задержку
                 setTimeout(() => {
                     initAllMobileNavigations();
-                }, 50);
+                }, 100);
             }
         }
         
@@ -1997,12 +2003,20 @@ const groupsData = [
             forceMobileInit();
         };
         
+        // Также инициализируем сразу при загрузке скрипта
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', forceMobileInit);
+        } else {
+            forceMobileInit();
+        }
+        
         // Переинициализация при изменении размера окна
         let resizeTimer;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
-                if (window.innerWidth <= 768) {
+                const isMobile = window.innerWidth <= 768 || (window.innerWidth <= 1024 && 'ontouchstart' in window);
+                if (isMobile) {
                     initAllMobileNavigations();
                 }
             }, 100);
