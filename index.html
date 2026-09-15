@@ -1080,18 +1080,41 @@ const groupsData = [
             let startX, startY, offsetX, offsetY;
             let isDragging = false;
             let switchTimeout = null;
+            let activePointerId = null;
+            let onWindowMove = null, onWindowUp = null, onWindowCancel = null;
+            
+            function removeWindowListeners() {
+                window.removeEventListener('pointermove', onWindowMove);
+                window.removeEventListener('pointerup', onWindowUp);
+                window.removeEventListener('pointercancel', onWindowCancel);
+                window.removeEventListener('blur', onWindowCancel);
+            }
             
             card.addEventListener('pointerdown', function(e) {
+                // Если прошлый drag не завершился корректно — принудительно сбрасываем его
+                if (onWindowUp) {
+                    removeWindowListeners();
+                    if (clone) { try { document.body.removeChild(clone); } catch(err) {} clone = null; }
+                    card.style.opacity = '1';
+                    isDragging = false;
+                }
                 const rect = card.getBoundingClientRect();
                 startX = e.clientX;
                 startY = e.clientY;
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
                 isDragging = false;
-                card.setPointerCapture(e.pointerId);
+                activePointerId = e.pointerId;
+                try { card.setPointerCapture(e.pointerId); } catch(err) {}
+                // Слушаем отпускание на window — не зависит от pointer capture
+                window.addEventListener('pointermove', onWindowMove);
+                window.addEventListener('pointerup', onWindowUp);
+                window.addEventListener('pointercancel', onWindowCancel);
+                window.addEventListener('blur', onWindowCancel);
             });
             
-            card.addEventListener('pointermove', function(e) {
+            onWindowMove = function(e) {
+                if (activePointerId !== null && e.pointerId !== activePointerId) return;
                 const deltaX = Math.abs(e.clientX - startX);
                 const deltaY = Math.abs(e.clientY - startY);
                 
@@ -1198,9 +1221,12 @@ const groupsData = [
                         }
                     }
                 }
-            });
+            };
             
-            card.addEventListener('pointerup', function(e) {
+            onWindowUp = function(e) {
+                removeWindowListeners();
+                activePointerId = null;
+                
                 if (!clone || !isDragging) {
                     isDragging = false;
                     if (clone) {
@@ -1263,10 +1289,12 @@ const groupsData = [
                 isDragging = false;
                 card.dataset.lastDragEnd = String(Date.now());
                 document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(z => z.classList.remove('drag-over'));
-            });
+            };
             
             // Обработчик для случая, когда pointer отменяется (например, при прокрутке)
-            card.addEventListener('pointercancel', function(e) {
+            onWindowCancel = function(e) {
+                removeWindowListeners();
+                activePointerId = null;
                 if (clone) {
                     try {
                         document.body.removeChild(clone);
@@ -1284,7 +1312,7 @@ const groupsData = [
                     btn.style.background = '';
                     btn.style.transform = '';
                 });
-            });
+            };
         }
         
         function createGroupCard(value) {
