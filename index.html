@@ -1668,13 +1668,18 @@ const groupsData = [
             
             highCards.forEach(card => {
                 const newCard = card.cloneNode(true);
+                // Сбрасываем guard pointer-drag: cloneNode копирует data-атрибуты,
+                // и addTouchDrag подумал бы, что обработчики уже повешены
+                newCard.removeAttribute('data-touch-drag-enabled');
+                newCard.removeAttribute('data-last-drag-end');
                 newCard.addEventListener('dragstart', handleDragStart);
                 newCard.addEventListener('dragend', handleDragEnd);
                 addTouchDrag(newCard); // Добавляем touch support
                 
                 if (newCard.classList.contains('editable-card')) {
                     newCard.addEventListener('click', function(e) {
-                        if (!this.classList.contains('dragging')) {
+                        const lastDrag = parseInt(this.dataset.lastDragEnd || '0', 10);
+                        if (!this.classList.contains('dragging') && Date.now() - lastDrag > 300) {
                             openEditModal(this);
                         }
                     });
@@ -1684,6 +1689,13 @@ const groupsData = [
             });
             
             setupDropZones();
+            
+            // Инициализируем мобильную карусель: до этого шага refined-область
+            // была скрыта (display:none) и initMobileColumnNavigation выходил раньше
+            initAllMobileNavigations();
+            setTimeout(() => {
+                initAllMobileNavigations();
+            }, 100);
         }
         
         function resetRefinedCards() {
