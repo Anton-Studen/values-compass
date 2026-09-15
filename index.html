@@ -1185,12 +1185,15 @@ const groupsData = [
                             switchTimeout = null;
                         }
                         
-                        // Ищем drop-zone
-                        let dropZone = elementBelow;
-                        while (dropZone && !dropZone.classList.contains('drop-zone') && !dropZone.classList.contains('values-drop-zone') && dropZone !== document.body) {
-                            dropZone = dropZone.parentElement;
+                        // Ищем drop-zone (в т.ч. через шапку/подложку колонки)
+                        let dropZone = elementBelow.closest('.drop-zone, .values-drop-zone');
+                        if (!dropZone) {
+                            const column = elementBelow.closest('.column, .values-column');
+                            if (column) {
+                                dropZone = column.querySelector('.drop-zone, .values-drop-zone');
+                            }
                         }
-                        if (dropZone && (dropZone.classList.contains('drop-zone') || dropZone.classList.contains('values-drop-zone'))) {
+                        if (dropZone) {
                             dropZone.classList.add('drag-over');
                         }
                     }
@@ -1227,12 +1230,26 @@ const groupsData = [
                 clone.style.display = 'block';
                 
                 if (elementBelow) {
-                    let dropZone = elementBelow;
-                    while (dropZone && !dropZone.classList.contains('drop-zone') && !dropZone.classList.contains('values-drop-zone') && dropZone !== document.body) {
-                        dropZone = dropZone.parentElement;
+                    let dropZone = elementBelow.closest('.drop-zone, .values-drop-zone');
+                    
+                    // Отпустили над шапкой/подложкой колонки — берём drop-zone этой колонки
+                    if (!dropZone) {
+                        const column = elementBelow.closest('.column, .values-column');
+                        if (column) {
+                            dropZone = column.querySelector('.drop-zone, .values-drop-zone');
+                        }
                     }
-                    if (dropZone && (dropZone.classList.contains('drop-zone') || dropZone.classList.contains('values-drop-zone'))) {
+                    
+                    if (dropZone) {
                         dropZone.appendChild(card);
+                        card.dataset.lastDragEnd = String(Date.now());
+                        
+                        // Если это боковая колонка карусели — переключаемся на неё,
+                        // чтобы пользователь увидел, что карточка зафиксировалась
+                        const targetColumn = dropZone.closest('.column, .values-column');
+                        if (targetColumn && targetColumn.classList.contains('mobile-side-button')) {
+                            targetColumn.click();
+                        }
                     }
                 }
                 
@@ -1244,6 +1261,7 @@ const groupsData = [
                 clone = null;
                 card.style.opacity = '1';
                 isDragging = false;
+                card.dataset.lastDragEnd = String(Date.now());
                 document.querySelectorAll('.drop-zone, .values-drop-zone').forEach(z => z.classList.remove('drag-over'));
             });
             
@@ -1489,7 +1507,8 @@ const groupsData = [
                     `;
                     
                     card.addEventListener('click', function(e) {
-                        if (!this.classList.contains('dragging')) {
+                        const lastDrag = parseInt(this.dataset.lastDragEnd || '0', 10);
+                        if (!this.classList.contains('dragging') && Date.now() - lastDrag > 300) {
                             openEditModal(this);
                         }
                     });
@@ -2045,7 +2064,6 @@ const groupsData = [
                 }
             }, 100);
         });
-        };
 
         window.addEventListener('resize', function() {
             if (window.innerWidth <= 768) {
